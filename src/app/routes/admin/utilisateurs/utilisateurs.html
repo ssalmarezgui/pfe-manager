@@ -1,0 +1,175 @@
+<div class="users-wrapper">
+  
+  <!-- ================= EN-TÊTE DE LA PAGE ================= -->
+  <div class="page-header">
+    <div class="title-row">
+      <h1 class="page-title">Administration — Gestion des Utilisateurs</h1>
+      <span class="count-badge">{{ users.length }} comptes enregistrés</span>
+    </div>
+    <p class="page-subtitle">Supervisez l'ensemble des comptes de la plateforme (Étudiants, Entreprises, Enseignants et Administrateurs)</p>
+  </div>
+
+  <!-- ================= BARRE D'OUTILS : ONGLETS PAR RÔLE & RECHERCHE ================= -->
+  <div class="toolbar-card">
+    
+    <!-- Onglets de filtres par rôles -->
+    <div class="role-tabs">
+      <button 
+        class="tab-btn" 
+        [class.active]="selectedRoleTab === 'ALL'" 
+        (click)="selectedRoleTab = 'ALL'">
+        Tous <span class="tab-count">{{ users.length }}</span>
+      </button>
+
+      <button 
+        class="tab-btn" 
+        [class.active]="selectedRoleTab === 'ETUDIANT'" 
+        (click)="selectedRoleTab = 'ETUDIANT'">
+        <mat-icon class="tab-icon">school</mat-icon>
+        Étudiants <span class="tab-count count-blue">{{ countByRole('ETUDIANT') }}</span>
+      </button>
+
+      <button 
+        class="tab-btn" 
+        [class.active]="selectedRoleTab === 'ENTREPRISE'" 
+        (click)="selectedRoleTab = 'ENTREPRISE'">
+        <mat-icon class="tab-icon">business</mat-icon>
+        Entreprises <span class="tab-count count-green">{{ countByRole('ENTREPRISE') }}</span>
+      </button>
+
+      <button 
+        class="tab-btn" 
+        [class.active]="selectedRoleTab === 'ENSEIGNANT'" 
+        (click)="selectedRoleTab = 'ENSEIGNANT'">
+        <mat-icon class="tab-icon">biotech</mat-icon>
+        Enseignants <span class="tab-count count-purple">{{ countByRole('ENSEIGNANT') }}</span>
+      </button>
+
+      <button 
+        class="tab-btn" 
+        [class.active]="selectedRoleTab === 'ADMIN'" 
+        (click)="selectedRoleTab = 'ADMIN'">
+        <mat-icon class="tab-icon">shield</mat-icon>
+        Admins <span class="tab-count count-indigo">{{ countByRole('ADMIN') }}</span>
+      </button>
+    </div>
+
+    <!-- Champ de recherche en direct -->
+    <div class="search-box">
+      <mat-icon class="search-icon">search</mat-icon>
+      <input 
+        type="text" 
+        [(ngModel)]="searchTerm" 
+        placeholder="Rechercher par nom, prénom ou email..." 
+        class="search-input"
+      />
+      @if (searchTerm) {
+        <button class="clear-btn" (click)="searchTerm = ''">
+          <mat-icon>close</mat-icon>
+        </button>
+      }
+    </div>
+
+  </div>
+
+  <!-- ================= TABLEAU DES UTILISATEURS ================= -->
+  <div class="table-card">
+    @if (isLoading) {
+      <div class="state-container">
+        <div class="spinner"></div>
+        <p>Chargement des utilisateurs...</p>
+      </div>
+    } @else if (filteredUsers.length === 0) {
+      <div class="state-container">
+        <mat-icon class="state-icon">person_off</mat-icon>
+        <h3>Aucun utilisateur trouvé</h3>
+        <p>Aucun compte ne correspond à vos filtres de recherche.</p>
+      </div>
+    } @else {
+      <div class="table-responsive">
+        <table mat-table [dataSource]="filteredUsers" class="custom-table">
+          
+          <!-- Colonne 1 : ID -->
+          <ng-container matColumnDef="id">
+            <th mat-header-cell *matHeaderCellDef style="width: 70px;">ID</th>
+            <td mat-cell *matCellDef="let element">
+              <span class="id-badge">#{{ element.id }}</span>
+            </td>
+          </ng-container>
+
+          <!-- Colonne 2 : Nom complet avec Avatar -->
+          <ng-container matColumnDef="nom">
+            <th mat-header-cell *matHeaderCellDef>Utilisateur</th>
+            <td mat-cell *matCellDef="let element">
+              <div class="user-cell">
+                <div class="user-avatar">{{ getInitials(element.prenom, element.nom) }}</div>
+                <div class="user-details">
+                  <span class="user-fullname">{{ element.prenom }} {{ element.nom }}</span>
+                  <span class="user-sub">Compte actif</span>
+                </div>
+              </div>
+            </td>
+          </ng-container>
+
+          <!-- Colonne 3 : Email -->
+          <ng-container matColumnDef="email">
+            <th mat-header-cell *matHeaderCellDef>Email</th>
+            <td mat-cell *matCellDef="let element">
+              <a [href]="'mailto:' + element.email" class="contact-link email-link">
+                <mat-icon>mail_outline</mat-icon>
+                <span>{{ element.email }}</span>
+              </a>
+            </td>
+          </ng-container>
+
+          <!-- Colonne 4 : Téléphone -->
+          <ng-container matColumnDef="tel">
+            <th mat-header-cell *matHeaderCellDef>Téléphone</th>
+            <td mat-cell *matCellDef="let element">
+              @if (element.tel) {
+                <a [href]="'tel:' + element.tel" class="contact-link phone-link">
+                  <mat-icon>phone</mat-icon>
+                  <span>{{ element.tel }}</span>
+                </a>
+              } @else {
+                <span class="text-muted">—</span>
+              }
+            </td>
+          </ng-container>
+
+          <!-- Colonne 5 : Rôles avec Badges distinctifs -->
+          <ng-container matColumnDef="roles">
+            <th mat-header-cell *matHeaderCellDef>Rôles attribués</th>
+            <td mat-cell *matCellDef="let element">
+              <div class="roles-container">
+                @for (role of getRoles(element); track $index) {
+                  <span class="role-pill" 
+                    [class.role-admin]="role.includes('ADMIN')"
+                    [class.role-student]="role.includes('ETUDIANT')"
+                    [class.role-company]="role.includes('ENTREPRISE')"
+                    [class.role-teacher]="role.includes('ENSEIGNANT')">
+                    {{ role.replace('ROLE_', '') }}
+                  </span>
+                }
+              </div>
+            </td>
+          </ng-container>
+
+          <!-- Colonne 6 : Actions -->
+          <ng-container matColumnDef="actions">
+            <th mat-header-cell *matHeaderCellDef class="text-center" style="width: 80px;">Action</th>
+            <td mat-cell *matCellDef="let element" class="text-center">
+              <button class="btn-delete" (click)="supprimer(element.id)" title="Supprimer cet utilisateur">
+                <mat-icon>delete_outline</mat-icon>
+              </button>
+            </td>
+          </ng-container>
+
+          <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+          <tr mat-row *matRowDef="let row; columns: displayedColumns" class="table-row"></tr>
+        </table>
+      </div>
+    }
+  </div>
+
+</div>

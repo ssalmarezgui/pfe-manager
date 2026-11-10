@@ -1,0 +1,119 @@
+<div class="labos-wrapper">
+  
+  <!-- ================= EN-TÊTE DE LA PAGE ================= -->
+  <div class="page-header">
+    <div>
+      <div class="title-row">
+        <h1 class="page-title">Annuaire des Laboratoires de Recherche</h1>
+        <span class="count-badge">{{ laboratoires.length }} unités de recherche</span>
+      </div>
+      <p class="page-subtitle">Laboratoires et unités scientifiques partenaires pour les PFE académiques et R&D</p>
+    </div>
+  </div>
+
+  <!-- ================= BARRE D'OUTILS ET RECHERCHE ================= -->
+  <div class="toolbar-card">
+    <div class="search-box">
+      <mat-icon class="search-icon">search</mat-icon>
+      <input 
+        type="text" 
+        [(ngModel)]="searchTerm" 
+        placeholder="Rechercher par laboratoire, domaine de recherche ou établissement..." 
+        class="search-input"
+      />
+      @if (searchTerm) {
+        <button class="clear-btn" (click)="searchTerm = ''">
+          <mat-icon>close</mat-icon>
+        </button>
+      }
+    </div>
+  </div>
+
+  <!-- ================= CARTE DU TABLEAU ================= -->
+  <div class="table-card">
+    @if (isLoading) {
+      <div class="state-container">
+        <div class="spinner"></div>
+        <p>Chargement des laboratoires de recherche...</p>
+      </div>
+    } @else if (filteredLaboratoires.length === 0) {
+      <div class="state-container">
+        <mat-icon class="state-icon">science</mat-icon>
+        <h3>Aucun laboratoire trouvé</h3>
+        <p>Aucun résultat ne correspond à votre recherche "{{ searchTerm }}".</p>
+      </div>
+    } @else {
+      <div class="table-responsive">
+        <table mat-table [dataSource]="filteredLaboratoires" class="custom-table">
+          
+          <!-- Colonne 1 : Laboratoire avec Avatar Violet -->
+          <ng-container matColumnDef="nom">
+            <th mat-header-cell *matHeaderCellDef>Laboratoire</th>
+            <td mat-cell *matCellDef="let element">
+              <div class="labo-cell">
+                <div class="labo-avatar">{{ getInitials(element.nom) }}</div>
+                <div class="labo-info">
+                  <span class="labo-name">{{ element.nom }}</span>
+                  <span class="labo-type">Unité de Recherche</span>
+                </div>
+              </div>
+            </td>
+          </ng-container>
+
+          <!-- Colonne 2 : Domaine de Recherche -->
+          <ng-container matColumnDef="domaine">
+            <th mat-header-cell *matHeaderCellDef>Domaine de recherche</th>
+            <td mat-cell *matCellDef="let element">
+              <span class="domain-pill">{{ element.domaine || 'Informatique & Technologies' }}</span>
+            </td>
+          </ng-container>
+
+          <!-- Colonne 3 : Établissement -->
+          <ng-container matColumnDef="etablissement">
+            <th mat-header-cell *matHeaderCellDef>Établissement</th>
+            <td mat-cell *matCellDef="let element">
+              <div class="institute-cell">
+                <mat-icon>account_balance</mat-icon>
+                <span>{{ element.etablissement || 'Université' }}</span>
+              </div>
+            </td>
+          </ng-container>
+
+          <!-- Colonne 4 : Email -->
+          <ng-container matColumnDef="email">
+            <th mat-header-cell *matHeaderCellDef>Email</th>
+            <td mat-cell *matCellDef="let element">
+              @if (element.email) {
+                <a [href]="'mailto:' + element.email" class="contact-link email-link">
+                  <mat-icon>mail_outline</mat-icon>
+                  <span>{{ element.email }}</span>
+                </a>
+              } @else {
+                <span class="text-muted">—</span>
+              }
+            </td>
+          </ng-container>
+
+          <!-- Colonne 5 : Téléphone -->
+          <ng-container matColumnDef="tel">
+            <th mat-header-cell *matHeaderCellDef>Téléphone</th>
+            <td mat-cell *matCellDef="let element">
+              @if (element.tel) {
+                <a [href]="'tel:' + element.tel" class="contact-link phone-link">
+                  <mat-icon>phone</mat-icon>
+                  <span>{{ element.tel }}</span>
+                </a>
+              } @else {
+                <span class="text-muted">—</span>
+              }
+            </td>
+          </ng-container>
+
+          <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+          <tr mat-row *matRowDef="let row; columns: displayedColumns" class="table-row"></tr>
+        </table>
+      </div>
+    }
+  </div>
+
+</div>

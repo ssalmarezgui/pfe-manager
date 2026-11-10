@@ -1,0 +1,131 @@
+<div class="catalogue-wrapper">
+  
+  <!-- ================= EN-TÊTE DE LA PAGE ================= -->
+  <div class="page-header">
+    <div>
+      <div class="title-row">
+        <h1 class="page-title">Catalogue des Sujets de PFE</h1>
+        <span class="count-badge">{{ sujets.length }} offres disponibles</span>
+      </div>
+      <p class="page-subtitle">Consultez les offres officielles validées par l'administration et postulez directement</p>
+    </div>
+  </div>
+
+  <!-- ================= BARRE DE RECHERCHE ET FILTRES ================= -->
+  <div class="filter-card">
+    <div class="filter-grid">
+      
+      <!-- Champ 1 : Mot-clé -->
+      <div class="filter-field">
+        <mat-form-field appearance="outline" class="w-100">
+          <mat-label>Recherche par mot-clé (titre, mot...)</mat-label>
+          <input matInput [(ngModel)]="keyword" (keyup.enter)="rechercher()" placeholder="Ex: Machine Learning, Cloud, Web..." />
+          <mat-icon matSuffix class="search-suffix-icon">search</mat-icon>
+        </mat-form-field>
+      </div>
+
+      <!-- Champ 2 : Technologie -->
+      <div class="filter-field">
+        <mat-form-field appearance="outline" class="w-100">
+          <mat-label>Filtrer par technologie</mat-label>
+          <input matInput [(ngModel)]="technologie" (keyup.enter)="rechercher()" placeholder="Ex: Angular, Spring Boot..." />
+          <mat-icon matSuffix class="search-suffix-icon">code</mat-icon>
+        </mat-form-field>
+      </div>
+
+      <!-- Boutons d'Action -->
+      <div class="filter-actions">
+        <button class="btn-filter" (click)="rechercher()">
+          <mat-icon>filter_list</mat-icon>
+          <span>Filtrer</span>
+        </button>
+        <button class="btn-reset" (click)="reinitialiser()" title="Réinitialiser les filtres">
+          <mat-icon>refresh</mat-icon>
+        </button>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ================= LISTE DES SUJETS ================= -->
+  @if (isLoading) {
+    <div class="state-card">
+      <div class="spinner"></div>
+      <p>Chargement des offres de PFE en cours...</p>
+    </div>
+  } @else if (sujets.length === 0) {
+    <div class="state-card empty-state">
+      <mat-icon class="state-icon">search_off</mat-icon>
+      <h3>Aucun sujet trouvé</h3>
+      <p>Aucun sujet de PFE validé ne correspond à vos critères de recherche.</p>
+      <button class="btn-reset-large" (click)="reinitialiser()">Réinitialiser les filtres</button>
+    </div>
+  } @else {
+    <div class="sujets-grid">
+      @for (sujet of sujets; track sujet.id) {
+        <div class="sujet-card">
+          
+          <!-- En-tête de la carte : Origine & Type -->
+          <div class="card-origin-bar">
+            @if (sujet.entreprise) {
+              <span class="origin-pill origin-entreprise">
+                <mat-icon>business</mat-icon>
+                <span>{{ sujet.entreprise.nom }}</span>
+              </span>
+              <span class="sector-tag">{{ sujet.entreprise.secteur }}</span>
+            } @else if (sujet.labo) {
+              <span class="origin-pill origin-labo">
+                <mat-icon>biotech</mat-icon>
+                <span>Labo: {{ sujet.labo.nom }}</span>
+              </span>
+              <span class="sector-tag">{{ sujet.labo.etablissement }}</span>
+            } @else {
+              <span class="origin-pill origin-etudiant">
+                <mat-icon>school</mat-icon>
+                <span>Proposition Étudiant</span>
+              </span>
+            }
+          </div>
+
+          <!-- Titre & Description -->
+          <div class="card-main-content">
+            <h3 class="sujet-title" [title]="sujet.titre">{{ sujet.titre }}</h3>
+            <p class="sujet-desc">{{ sujet.description }}</p>
+          </div>
+
+          <!-- Métadonnées : Durée & Technologies -->
+          <div class="card-meta">
+            
+            <div class="duration-row">
+              <mat-icon>schedule</mat-icon>
+              <span>Durée : <strong>{{ sujet.duree || '6 mois' }}</strong></span>
+            </div>
+
+            <!-- Badges Technologies individuels -->
+            <div class="tech-tags-container">
+              @for (tech of getTechList(sujet.technologies); track $index) {
+                <span class="tech-chip">{{ tech }}</span>
+              }
+            </div>
+
+          </div>
+
+          <!-- Pied de carte : Statut & Action Postuler -->
+          <div class="card-footer">
+            <span class="status-pill status-valide">
+              <span class="dot"></span>
+              Validé
+            </span>
+
+            <button class="btn-apply" (click)="postuler(sujet)">
+              <mat-icon>mail_outline</mat-icon>
+              <span>Postuler</span>
+            </button>
+          </div>
+
+        </div>
+      }
+    </div>
+  }
+
+</div>

@@ -1,0 +1,171 @@
+<div class="dashboard-wrapper">
+  
+  <!-- ================= BANNIÈRE D'ACCUEIL & ACTIONS RAPIDES ================= -->
+  <div class="welcome-banner">
+    <div class="welcome-text">
+      <h2>Tableau de Bord & Supervision</h2>
+      <p>Bienvenue sur votre espace de gestion des Projets de Fin d'Études.</p>
+    </div>
+    <div class="quick-actions">
+      <button class="btn-action btn-primary-action" (click)="allerVers('/catalogue')">
+        <mat-icon>search</mat-icon>
+        <span>Explorer les sujets</span>
+      </button>
+      <!-- ✅ Vraie adresse avec /admin/ -->
+      <button class="btn-action btn-outline-action" (click)="allerVers('/admin/validation-sujets')">
+        <mat-icon>check_circle</mat-icon>
+        <span>À Valider</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- ================= 4 CARTES KPI (AVEC LES VRAIES ADRESSES) ================= -->
+  <div class="kpi-grid">
+    
+    <!-- 1. TOTAL SUJETS -->
+    <div class="interactive-card card-indigo" (click)="allerVers('/catalogue')" role="button" tabindex="0">
+      <div class="card-top">
+        <div class="icon-bubble">
+          <mat-icon>assignment</mat-icon>
+        </div>
+        <span class="live-pill">Direct</span>
+      </div>
+      <div class="card-metric">
+        <span class="metric-label">TOTAL SUJETS</span>
+        <h2 class="metric-value">{{ stats[0].amount }}</h2>
+      </div>
+      <div class="card-bottom">
+        <span class="card-link-text">Consulter le catalogue</span>
+        <mat-icon class="arrow-icon">arrow_forward</mat-icon>
+      </div>
+    </div>
+
+    <!-- 2. ENTREPRISES (✅ Vraie adresse : /annuaire/entreprises) -->
+    <div class="interactive-card card-teal" (click)="allerVers('/annuaire/entreprises')" role="button" tabindex="0">
+      <div class="card-top">
+        <div class="icon-bubble">
+          <mat-icon>business</mat-icon>
+        </div>
+        <span class="live-pill">Partenaires</span>
+      </div>
+      <div class="card-metric">
+        <span class="metric-label">ENTREPRISES</span>
+        <h2 class="metric-value">{{ stats[1].amount }}</h2>
+      </div>
+      <div class="card-bottom">
+        <span class="card-link-text">Voir les entreprises</span>
+        <mat-icon class="arrow-icon">arrow_forward</mat-icon>
+      </div>
+    </div>
+
+    <!-- 3. LABORATOIRES (✅ Vraie adresse : /annuaire/laboratoires) -->
+    <div class="interactive-card card-purple" (click)="allerVers('/annuaire/laboratoires')" role="button" tabindex="0">
+      <div class="card-top">
+        <div class="icon-bubble">
+          <mat-icon>school</mat-icon>
+        </div>
+        <span class="live-pill">Recherche</span>
+      </div>
+      <div class="card-metric">
+        <span class="metric-label">LABORATOIRES</span>
+        <h2 class="metric-value">{{ stats[2].amount }}</h2>
+      </div>
+      <div class="card-bottom">
+        <span class="card-link-text">Voir les unités</span>
+        <mat-icon class="arrow-icon">arrow_forward</mat-icon>
+      </div>
+    </div>
+
+    <!-- 4. EN ATTENTE (✅ Vraie adresse : /admin/validation-sujets) -->
+    <div class="interactive-card card-amber" (click)="allerVers('/admin/validation-sujets')" role="button" tabindex="0">
+      <div class="card-top">
+        <div class="icon-bubble">
+          <mat-icon>schedule</mat-icon>
+        </div>
+        <span class="live-pill pill-alert">Urgent</span>
+      </div>
+      <div class="card-metric">
+        <span class="metric-label">EN ATTENTE</span>
+        <h2 class="metric-value">{{ stats[3].amount }}</h2>
+      </div>
+      <div class="card-bottom">
+        <span class="card-link-text">Traiter les demandes</span>
+        <mat-icon class="arrow-icon">arrow_forward</mat-icon>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- ================= LIGNE 2 : ANALYTIQUES & SYSTÈME ================= -->
+  <div class="content-grid">
+    
+    <!-- Colonne Gauche : Répartition par Technologie -->
+    <div class="content-panel">
+      <div class="panel-header">
+        <div>
+          <h3 class="panel-title">Répartition par Technologie</h3>
+          <p class="panel-subtitle">Compétences sollicitées dans les sujets validés</p>
+        </div>
+        <span class="badge-subtle">Temps réel</span>
+      </div>
+
+      <div class="panel-body">
+        @if (techList.length === 0) {
+          <p class="empty-text">Aucun sujet répertorié pour le moment.</p>
+        } @else {
+          <div class="tech-stack-list">
+            @for (tech of techList; track $index) {
+              <div class="tech-row">
+                <div class="tech-header">
+                  <span class="tech-name">{{ tech.name }}</span>
+                  <div class="tech-stats">
+                    <span class="count-tag">{{ tech.count }} sujet(s)</span>
+                    <span class="pct-tag">{{ tech.percentage }}%</span>
+                  </div>
+                </div>
+                <div class="progress-track">
+                  <div class="progress-bar-glow" [style.width.%]="tech.percentage"></div>
+                </div>
+              </div>
+            }
+          </div>
+        }
+      </div>
+    </div>
+
+    <!-- Colonne Droite : Informations Système -->
+    <div class="content-panel">
+      <div class="panel-header">
+        <div>
+          <h3 class="panel-title">Informations Système</h3>
+          <p class="panel-subtitle">Disponibilité et configuration</p>
+        </div>
+      </div>
+
+      <div class="panel-body">
+        <p class="desc-info">
+          Plateforme centralisée de gestion des PFE, coordination des unités de recherche et des partenaires industriels.
+        </p>
+
+        <div class="system-list">
+          <div class="system-row">
+            <span class="sys-item">Validation des sujets</span>
+            <span class="status-badge status-green">Active</span>
+          </div>
+
+          <div class="system-row">
+            <span class="sys-item">Session académique</span>
+            <span class="academic-year">2024 — 2025</span>
+          </div>
+
+          <div class="system-row">
+            <span class="sys-item">Serveur Backend</span>
+            <span class="status-badge status-blue">Connecté (8080)</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+</div>

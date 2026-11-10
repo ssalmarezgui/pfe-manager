@@ -1,0 +1,221 @@
+<div class="validation-wrapper">
+  
+  <!-- ================= EN-TÊTE DE LA PAGE ================= -->
+  <div class="page-header">
+    <div class="title-row">
+      <h1 class="page-title">Administration — Validation des Sujets</h1>
+      @if (countByStatus('EN_ATTENTE') > 0) {
+        <span class="urgent-badge">
+          <span class="ping-dot"></span>
+          {{ countByStatus('EN_ATTENTE') }} en attente d'arbitrage
+        </span>
+      } @else {
+        <span class="count-badge">Tous les sujets sont arbitrés</span>
+      }
+    </div>
+    <p class="page-subtitle">Examinez, validez pour publication au catalogue ou refusez les offres soumises</p>
+  </div>
+
+  <!-- ================= BARRE D'OUTILS : ONGLETS & RECHERCHE ================= -->
+  <div class="toolbar-card">
+    
+    <!-- Onglets de statut -->
+    <div class="status-tabs">
+      <button 
+        class="tab-btn" 
+        [class.active]="selectedTab === 'ALL'" 
+        (click)="selectedTab = 'ALL'">
+        Tous <span class="tab-count">{{ sujets.length }}</span>
+      </button>
+
+      <button 
+        class="tab-btn tab-pending" 
+        [class.active]="selectedTab === 'EN_ATTENTE'" 
+        (click)="selectedTab = 'EN_ATTENTE'">
+        En Attente <span class="tab-count count-amber">{{ countByStatus('EN_ATTENTE') }}</span>
+      </button>
+
+      <button 
+        class="tab-btn" 
+        [class.active]="selectedTab === 'VALIDE'" 
+        (click)="selectedTab = 'VALIDE'">
+        Validés <span class="tab-count count-green">{{ countByStatus('VALIDE') }}</span>
+      </button>
+
+      <button 
+        class="tab-btn" 
+        [class.active]="selectedTab === 'REFUSE'" 
+        (click)="selectedTab = 'REFUSE'">
+        Refusés <span class="tab-count count-red">{{ countByStatus('REFUSE') }}</span>
+      </button>
+    </div>
+
+    <!-- Champ de recherche en direct -->
+    <div class="search-box">
+      <mat-icon class="search-icon">search</mat-icon>
+      <input 
+        type="text" 
+        [(ngModel)]="searchTerm" 
+        placeholder="Rechercher par sujet, déposant ou technologie..." 
+        class="search-input"
+      />
+      @if (searchTerm) {
+        <button class="clear-btn" (click)="searchTerm = ''">
+          <mat-icon>close</mat-icon>
+        </button>
+      }
+    </div>
+
+  </div>
+
+  <!-- ================= TABLEAU DE VALIDATION ================= -->
+  <div class="table-card">
+    @if (isLoading) {
+      <div class="state-container">
+        <div class="spinner"></div>
+        <p>Chargement des dossiers soumis...</p>
+      </div>
+    } @else if (filteredSujets.length === 0) {
+      <div class="state-container">
+        <mat-icon class="state-icon">done_all</mat-icon>
+        <h3>Aucun sujet trouvé</h3>
+        <p>Aucun dossier ne correspond à vos filtres actuels.</p>
+      </div>
+    } @else {
+      <div class="table-responsive">
+        <table mat-table [dataSource]="filteredSujets" class="custom-table">
+          
+          <!-- Titre du Sujet -->
+          <ng-container matColumnDef="titre">
+            <th mat-header-cell *matHeaderCellDef>Titre du Sujet</th>
+            <td mat-cell *matCellDef="let element">
+              <div class="subject-cell">
+                <span class="subject-title">{{ element.titre }}</span>
+                <span class="subject-desc">{{ element.description }}</span>
+              </div>
+            </td>
+          </ng-container>
+
+          <!-- Proposé par (Origine avec Badge) -->
+          <ng-container matColumnDef="proposePar">
+            <th mat-header-cell *matHeaderCellDef>Déposant / Organisme</th>
+            <td mat-cell *matCellDef="let element">
+              @if (element.entreprise) {
+                <div class="depositor-pill dep-entreprise">
+                  <mat-icon>business</mat-icon>
+                  <div class="dep-info">
+                    <span class="dep-name">{{ element.entreprise.nom }}</span>
+                    <span class="dep-type">Entreprise</span>
+                  </div>
+                </div>
+              } @else if (element.labo) {
+                <div class="depositor-pill dep-labo">
+                  <mat-icon>biotech</mat-icon>
+                  <div class="dep-info">
+                    <span class="dep-name">{{ element.labo.nom }}</span>
+                    <span class="dep-type">Laboratoire</span>
+                  </div>
+                </div>
+              } @else if (element.etudiant) {
+                <div class="depositor-pill dep-etudiant">
+                  <mat-icon>school</mat-icon>
+                  <div class="dep-info">
+                    <span class="dep-name">{{ element.etudiant.prenom }} {{ element.etudiant.nom }}</span>
+                    <span class="dep-type">Étudiant</span>
+                  </div>
+                </div>
+              } @else {
+                <span class="text-muted">Non spécifié</span>
+              }
+            </td>
+          </ng-container>
+
+          <!-- Technologies -->
+          <ng-container matColumnDef="technologies">
+            <th mat-header-cell *matHeaderCellDef>Technologies</th>
+            <td mat-cell *matCellDef="let element">
+              <div class="tech-tags-list">
+                @for (tech of getTechList(element.technologies); track $index) {
+                  <span class="tech-chip">{{ tech }}</span>
+                }
+              </div>
+            </td>
+          </ng-container>
+
+          <!-- Durée -->
+          <ng-container matColumnDef="duree">
+            <th mat-header-cell *matHeaderCellDef>Durée</th>
+            <td mat-cell *matCellDef="let element">
+              <div class="duration-badge">
+                <mat-icon>schedule</mat-icon>
+                <span>{{ element.duree || '6 mois' }}</span>
+              </div>
+            </td>
+          </ng-container>
+
+          <!-- Statut -->
+          <ng-container matColumnDef="statut">
+            <th mat-header-cell *matHeaderCellDef>Statut</th>
+            <td mat-cell *matCellDef="let element">
+              @if (element.statut === 'VALIDE') {
+                <span class="status-pill status-valide">
+                  <span class="dot"></span> Validé
+                </span>
+              } @else if (element.statut === 'REFUSE') {
+                <span class="status-pill status-refuse">
+                  <span class="dot"></span> Refusé
+                </span>
+              } @else {
+                <span class="status-pill status-pending">
+                  <span class="dot pulse"></span> En attente
+                </span>
+              }
+            </td>
+          </ng-container>
+
+          <!-- Décisions Administrateur -->
+          <ng-container matColumnDef="actions">
+            <th mat-header-cell *matHeaderCellDef class="text-center">Décision Admin</th>
+            <td mat-cell *matCellDef="let element" class="text-center">
+              <div class="decision-group">
+                
+                <!-- Bouton Valider -->
+                <button 
+                  class="btn-decision btn-approve" 
+                  (click)="valider(element.id)" 
+                  [disabled]="element.statut === 'VALIDE'"
+                  title="Valider et rendre visible aux étudiants">
+                  <mat-icon>check</mat-icon>
+                  <span>Valider</span>
+                </button>
+
+                <!-- Bouton Refuser -->
+                <button 
+                  class="btn-decision btn-reject" 
+                  (click)="refuser(element.id)" 
+                  [disabled]="element.statut === 'REFUSE'"
+                  title="Refuser ce sujet">
+                  <mat-icon>close</mat-icon>
+                  <span>Refuser</span>
+                </button>
+
+                <!-- Bouton Supprimer -->
+                <button 
+                  class="btn-delete" 
+                  (click)="supprimer(element.id)" 
+                  title="Supprimer définitivement">
+                  <mat-icon>delete_outline</mat-icon>
+                </button>
+
+              </div>
+            </td>
+          </ng-container>
+
+          <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+          <tr mat-row *matRowDef="let row; columns: displayedColumns" class="table-row"></tr>
+        </table>
+      </div>
+    }
+  </div>
+
+</div>

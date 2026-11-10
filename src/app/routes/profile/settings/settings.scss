@@ -1,0 +1,186 @@
+/* --- BOÎTE DU PANNEAU (STYLE HARMONISÉ) --- */
+.panel-box {
+  background: #ffffff;
+  border-radius: 16px;
+  border: 1px solid #e5e7eb;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.02);
+  overflow: hidden;
+
+  .panel-header {
+    padding: 18px 24px;
+    border-bottom: 1px solid #f3f4f6;
+
+    .panel-title-group {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+
+      .header-icon-box {
+        width: 40px;
+        height: 40px;
+        border-radius: 10px;
+        background: #eef2ff;
+        color: #4f46e5;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+
+        mat-icon {
+          font-size: 22px;
+          width: 22px;
+          height: 22px;
+        }
+      }
+
+      .panel-title {
+        font-size: 16px;
+        font-weight: 700;
+        color: #111827;
+        margin: 0;
+      }
+
+      .panel-subtitle {
+        font-size: 12.5px;
+        color: #6b7280;
+        margin: 2px 0 0 0;
+      }
+    }
+  }
+
+  .panel-body {
+    padding: 24px;
+  }
+}
+
+/* --- GRILLE DU FORMULAIRE --- */
+.form-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 16px;
+
+  @media (max-width: 650px) {
+    grid-template-columns: 1fr;
+  }
+
+  .full-col {
+    grid-column: 1 / -1;
+  }
+
+  .form-label {
+    display: block;
+    font-size: 12.5px;
+    font-weight: 600;
+    color: #374151;
+    margin-bottom: 6px;
+
+    .required-star {
+      color: #ef4444;
+    }
+  }
+}
+
+/* --- ADOUCISSEMENT DES BORDURES ET FOCUS INDIGO --- */
+::ng-deep .settings-form {
+  mat-form-field {
+    width: 100% !important;
+
+    // Bordure douce gris clair au repos
+    .mdc-notched-outline__leading,
+    .mdc-notched-outline__notch,
+    .mdc-notched-outline__trailing {
+      border-color: #d1d5db !important;
+      border-width: 1px !important;
+    }
+
+    // Bordure Indigo moderne au focus/clic
+    &.mat-focused {
+      .mdc-notched-outline__leading,
+      .mdc-notched-outline__notch,
+      .mdc-notched-outline__trailing {
+        border-color: #4f46e5 !important;
+        border-width: 2px !important;
+      }
+    }
+
+    input.mat-mdc-input-element {
+      border: none !important;
+      outline: none !important;
+      box-shadow: none !important;
+      background: transparent !important;
+      padding: 0 !important;
+      color: #111827 !important;
+      font-size: 13.5px !important;
+    }
+
+    .suffix-icon {
+      color: #9ca3af;
+    }
+
+    // Champ Email désactivé propre
+    &.disabled-field {
+      .mat-mdc-text-field-wrapper {
+        background-color: #f9fafb !important;
+        border-radius: 8px;
+      }
+      input.mat-mdc-input-element {
+        color: #6b7280 !important;
+      }
+      .lock-icon {
+        color: #9ca3af;
+      }
+    }
+  }
+}
+
+/* --- PIED DE FORMULAIRE --- */
+.form-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 20px;
+  padding-top: 16px;
+  border-top: 1px solid #f3f4f6;
+  // Marge droite pour ne JAMAIS être touché par le bouton flottant de l'engrenage !
+  padding-right: 50px; 
+
+  .required-hint {
+    font-size: 12px;
+    color: #9ca3af;
+  }
+
+  .btn-save-primary {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    height: 44px;
+    padding: 0 22px;
+    background: #4f46e5;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-size: 13.5px;
+    font-weight: 700;
+    cursor: pointer;
+    box-shadow: 0 4px 12px rgba(79, 70, 229, 0.25);
+    transition: all 0.2s ease;
+
+    &:hover:not(:disabled) {
+      background: #4338ca;
+      transform: translateY(-1px);
+      box-shadow: 0 6px 16px rgba(79, 70, 229, 0.35);
+    }
+
+    &:disabled {
+      background: #e5e7eb;
+      color: #9ca3af;
+      box-shadow: none;
+      cursor: not-allowed;
+    }
+
+    mat-icon {
+      font-size: 18px;
+      width: 18px;
+      height: 18px;
+    }
+  }
+}

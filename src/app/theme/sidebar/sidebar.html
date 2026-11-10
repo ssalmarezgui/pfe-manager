@@ -1,0 +1,15 @@
+@if (showHeader()) {
+  <div class="matero-sidebar-header">
+    <mat-toolbar>
+      <!-- Le logo PFE Manager reste seul et bien aéré -->
+      <app-branding />
+    </mat-toolbar>
+  </div>
+}
+
+<div class="matero-sidebar-main">
+  @if (showUser()) {
+    <app-user-panel />
+  }
+  <app-sidemenu />
+</div>
