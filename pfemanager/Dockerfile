@@ -2,6 +2,9 @@
 FROM eclipse-temurin:17-jdk-jammy AS build
 WORKDIR /app
 COPY . .
+# 1. On donne les droits au fichier (c'est ça qui corrige le bug !)
+RUN chmod +x ./mvnw 
+# 2. On compile
 RUN ./mvnw clean package -DskipTests
 
 # Étape 2 : Exécution de l'application
