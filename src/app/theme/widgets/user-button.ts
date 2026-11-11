@@ -133,9 +133,12 @@ export class UserButton {
 
   logout() {
     this.auth.logout().subscribe(() => {
-      localStorage.clear();
-      sessionStorage.clear();
-      this.router.navigateByUrl('/auth/login');
+      sessionStorage.removeItem('auth-token');
+      sessionStorage.removeItem('auth-user');
+      
+      this.router.navigateByUrl('/auth/login').then(() => {
+        window.location.reload();
+      });
     });
   }
 }

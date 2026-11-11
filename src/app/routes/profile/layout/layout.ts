@@ -43,12 +43,14 @@ export class ProfileLayout {
       .toUpperCase();
   }
 
-  logout(): void {
+  logout() {
     this.auth.logout().subscribe(() => {
-      // Nettoyage complet de la session
-      localStorage.clear();
-      sessionStorage.clear();
-      this.router.navigateByUrl('/auth/login');
+      sessionStorage.removeItem('auth-token');
+      sessionStorage.removeItem('auth-user');
+      
+      this.router.navigateByUrl('/auth/login').then(() => {
+        window.location.reload();
+      });
     });
   }
 }

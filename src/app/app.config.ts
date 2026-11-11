@@ -20,7 +20,6 @@ import { withFormlyMaterial } from '@ngx-formly/material';
 import { provideTranslateService, TranslateService } from '@ngx-translate/core';
 import { provideTranslateHttpLoader } from '@ngx-translate/http-loader';
 import { provideHotToastConfig } from '@ngxpert/hot-toast';
-import { InMemoryWebApiModule } from 'angular-in-memory-web-api';
 import { NgxPermissionsModule } from 'ngx-permissions';
 
 import {
@@ -52,14 +51,7 @@ export const appConfig: ApplicationConfig = {
     provideTranslateService({
       loader: provideTranslateHttpLoader({ prefix: 'i18n/', suffix: '.json' }),
     }),
-    importProvidersFrom(
-      NgxPermissionsModule.forRoot(),
-      // 👇 ❌ This is only used for demo purpose, remove it in the realworld application
-      InMemoryWebApiModule.forRoot(InMemDataService, {
-        dataEncapsulation: false,
-        passThruUnknownUrl: true,
-      })
-    ),
+    importProvidersFrom(NgxPermissionsModule.forRoot()),
     provideFormlyCore([...withFormlyMaterial()]),
     {
       provide: FORMLY_CONFIG,

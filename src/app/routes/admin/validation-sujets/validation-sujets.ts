@@ -7,6 +7,8 @@ import { MatTableModule } from '@angular/material/table';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatSnackBar } from '@angular/material/snack-bar';
+import { TemplateRef, ViewChild } from '@angular/core';
+import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 
 @Component({
   selector: 'app-validation-sujets',
@@ -17,26 +19,66 @@ import { MatSnackBar } from '@angular/material/snack-bar';
     MatCardModule, 
     MatTableModule, 
     MatButtonModule, 
+    MatDialogModule,
     MatIconModule
+    
   ],
   templateUrl: './validation-sujets.html',
   styleUrl: './validation-sujets.scss',
 })
 export class ValidationSujets implements OnInit {
+  readonly JSON = JSON; 
   private readonly http = inject(HttpClient);
   private readonly cdr = inject(ChangeDetectorRef);
   private readonly snackBar = inject(MatSnackBar);
 
   sujets: any[] = [];
-  displayedColumns: string[] = ['titre', 'proposePar', 'technologies', 'duree', 'statut', 'actions'];
   isLoading = true;
+
+  displayedColumns: string[] = ['titre', 'proposePar', 'technologies', 'duree', 'statut', 'documents', 'actions'];
+
+  // Vérifie si le sujet MySQL contient le PDF
+  hasDoc(sujet: any, docId: string): boolean {
+    if (!sujet) return false;
+    if (docId === 'convention') return !!sujet.conventionNom;
+    if (docId === 'attestation') return !!sujet.attestationNom;
+    if (docId === 'rapport') return !!sujet.rapportNom;
+    return false;
+  }
+
+  // Ouvre le vrai PDF stocké dans MySQL
+  ouvrirDocument(sujet: any, docId: string): void {
+    let dataUrl = '';
+    let nom = '';
+
+    if (docId === 'convention') { dataUrl = sujet.conventionData; nom = sujet.conventionNom; }
+    if (docId === 'attestation') { dataUrl = sujet.attestationData; nom = sujet.attestationNom; }
+    if (docId === 'rapport') { dataUrl = sujet.rapportData; nom = sujet.rapportNom; }
+
+    if (dataUrl) {
+      const win = window.open();
+      win?.document.write(
+        `<iframe src="${dataUrl}" frameborder="0" style="border:0; top:0px; left:0px; bottom:0px; right:0px; width:100%; height:100%;" allowfullscreen></iframe>`
+      );
+    } else {
+      alert(`Document : ${nom}`);
+    }
+  }
+
+  getDocName(sujetId: number, docId: string): string {
+    const raw = localStorage.getItem(`pfe_docs_sujet_${sujetId}`);
+    if (!raw) return 'Non déposé';
+    const docs = JSON.parse(raw);
+    const doc = docs.find((d: any) => d.id === docId);
+    return doc?.fichier ? `${doc.nom} : ${doc.fichier} (${doc.dateDepot})` : `${doc.nom} non déposée`;
+  }
 
   // Filtres
   selectedTab: 'ALL' | 'EN_ATTENTE' | 'VALIDE' | 'REFUSE' = 'ALL';
   searchTerm: string = '';
 
   private getHeaders(): { headers: HttpHeaders } {
-    const token = localStorage.getItem('auth-token') || sessionStorage.getItem('auth-token');
+    const token = sessionStorage.getItem('auth-token');
     return {
       headers: new HttpHeaders({
         'Authorization': `Bearer ${token}`
@@ -114,15 +156,39 @@ export class ValidationSujets implements OnInit {
     });
   }
 
+  // 1. Déclarer le dialogue et récupérer le HTML
+  private readonly dialog = inject(MatDialog);
+  @ViewChild('confirmDialog') confirmDialogTemplate!: TemplateRef<any>;
+
+  // 2. La nouvelle fonction moderne
   supprimer(id: number): void {
-    if (confirm('Voulez-vous réellement supprimer définitivement ce sujet ?')) {
-      this.http.delete(`http://localhost:8080/api/sujets/${id}`, this.getHeaders()).subscribe({
-        next: () => {
-          this.snackBar.open('Sujet supprimé du système.', 'Fermer', { duration: 3000 });
-          this.chargerTousLesSujets();
-        },
-      });
-    }
+    // Ouvre la belle popup
+    const dialogRef = this.dialog.open(this.confirmDialogTemplate, {
+      width: '380px',
+      panelClass: 'modern-dialog',
+      autoFocus: false
+    });
+
+    // Écoute la réponse du clic
+    dialogRef.afterClosed().subscribe((result) => {
+      if (result) {
+        // Si on a cliqué sur "Oui, Supprimer" (result = true)
+        this.http.delete(`http://localhost:8080/api/sujets/${id}`, this.getHeaders()).subscribe({
+          next: () => {
+            this.snackBar.open('Élément supprimé avec succès.', 'Fermer', { 
+              duration: 3000, horizontalPosition: 'end', verticalPosition: 'top', panelClass: ['success-snackbar'] 
+            });
+            // N'oubliez pas d'appeler ici la fonction pour rafraîchir la liste !
+            // Ex: this.chargerUtilisateurs(); OU this.chargerMesSujets();
+          },
+          error: () => {
+            this.snackBar.open('Erreur lors de la suppression.', 'Fermer', { 
+              duration: 3000, horizontalPosition: 'end', verticalPosition: 'top', panelClass: ['error-snackbar'] 
+            });
+          },
+        });
+      }
+    });
   }
 
   getTechList(technologies: string): string[] {

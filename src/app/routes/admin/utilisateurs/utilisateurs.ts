@@ -1,5 +1,5 @@
 import { HttpClient, HttpHeaders } from '@angular/common/http';
-import { Component, OnInit, inject, ChangeDetectorRef } from '@angular/core';
+import { Component, OnInit, inject, ChangeDetectorRef, TemplateRef, ViewChild, ViewEncapsulation } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { MatCardModule } from '@angular/material/card';
@@ -7,6 +7,7 @@ import { MatTableModule } from '@angular/material/table';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatSnackBar } from '@angular/material/snack-bar';
+import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 
 @Component({
   selector: 'app-utilisateurs',
@@ -18,25 +19,29 @@ import { MatSnackBar } from '@angular/material/snack-bar';
     MatTableModule,
     MatButtonModule,
     MatIconModule,
+    MatDialogModule,
   ],
   templateUrl: './utilisateurs.html',
   styleUrl: './utilisateurs.scss',
+  encapsulation: ViewEncapsulation.None, // 👈 FORCE LE STYLE DES TOASTS !
 })
 export class Utilisateurs implements OnInit {
   private readonly http = inject(HttpClient);
   private readonly cdr = inject(ChangeDetectorRef);
   private readonly snackBar = inject(MatSnackBar);
+  private readonly dialog = inject(MatDialog);
+
+  @ViewChild('confirmDialog') confirmDialogTemplate!: TemplateRef<any>;
 
   users: any[] = [];
   displayedColumns: string[] = ['id', 'nom', 'email', 'tel', 'roles', 'actions'];
   isLoading = true;
 
-  // Filtres
   selectedRoleTab: string = 'ALL';
   searchTerm: string = '';
 
   private getHeaders(): { headers: HttpHeaders } {
-    const token = localStorage.getItem('auth-token') || sessionStorage.getItem('auth-token');
+    const token = sessionStorage.getItem('auth-token');
     return {
       headers: new HttpHeaders({
         'Authorization': `Bearer ${token}`
@@ -52,7 +57,8 @@ export class Utilisateurs implements OnInit {
     this.isLoading = true;
     this.http.get<any[]>('http://localhost:8080/api/users', this.getHeaders()).subscribe({
       next: (data) => {
-        this.users = data || [];
+        // 👈 Le spread operator [...] force Angular à rafraîchir le tableau visuellement
+        this.users = [...(data || [])]; 
         this.isLoading = false;
         this.cdr.detectChanges();
       },
@@ -63,7 +69,13 @@ export class Utilisateurs implements OnInit {
     });
   }
 
-  // Filtrage combiné (Rôle + Barre de recherche)
+  getFullName(user: any): string {
+    if (user.prenom && user.nom) return `${user.prenom} ${user.nom}`;
+    if (user.name) return user.name;
+    if (user.username) return user.username;
+    return user.email ? user.email.split('@')[0] : 'Utilisateur';
+  }
+
   get filteredUsers(): any[] {
     let result = this.users;
 
@@ -76,18 +88,19 @@ export class Utilisateurs implements OnInit {
 
     if (this.searchTerm.trim()) {
       const term = this.searchTerm.toLowerCase();
-      result = result.filter(u =>
-        (u.nom && u.nom.toLowerCase().includes(term)) ||
-        (u.prenom && u.prenom.toLowerCase().includes(term)) ||
-        (u.email && u.email.toLowerCase().includes(term)) ||
-        (u.tel && u.tel.toLowerCase().includes(term))
-      );
+      result = result.filter(u => {
+        const fullName = this.getFullName(u).toLowerCase();
+        return (
+          fullName.includes(term) ||
+          (u.email && u.email.toLowerCase().includes(term)) ||
+          (u.tel && u.tel.toLowerCase().includes(term))
+        );
+      });
     }
 
     return result;
   }
 
-  // Compteur par rôle
   countByRole(roleSub: string): number {
     return this.users.filter(u => {
       const roles = (u.roles || []).map((r: any) => (r.libelle || r).toUpperCase());
@@ -95,30 +108,52 @@ export class Utilisateurs implements OnInit {
     }).length;
   }
 
-  // Récupère les rôles sous forme de tableau
   getRoles(user: any): string[] {
-    if (!user.roles || user.roles.length === 0) return ['Utilisateur'];
+    if (!user.roles || user.roles.length === 0) return ['UTILISATEUR'];
     return user.roles.map((r: any) => r.libelle || r);
   }
 
-  // Initiales de l'avatar
-  getInitials(prenom: string, nom: string): string {
-    const p = prenom ? prenom.charAt(0) : '';
-    const n = nom ? nom.charAt(0) : '';
-    return (p + n).toUpperCase() || 'U';
+  getInitials(user: any): string {
+    const name = this.getFullName(user);
+    return name
+      .trim()
+      .split(' ')
+      .map(part => part.charAt(0))
+      .slice(0, 2)
+      .join('')
+      .toUpperCase();
   }
 
   supprimer(id: number): void {
-    if (confirm('Voulez-vous réellement supprimer définitivement cet utilisateur ?')) {
-      this.http.delete(`http://localhost:8080/api/users/${id}`, this.getHeaders()).subscribe({
-        next: () => {
-          this.snackBar.open('Utilisateur supprimé avec succès.', 'Fermer', { duration: 3000 });
-          this.chargerUtilisateurs();
-        },
-        error: () => {
-          this.snackBar.open('Erreur lors de la suppression de l’utilisateur.', 'Fermer', { duration: 3000 });
-        },
-      });
-    }
+    const dialogRef = this.dialog.open(this.confirmDialogTemplate, {
+      width: '380px',
+      panelClass: 'modern-dialog',
+      autoFocus: false
+    });
+
+    dialogRef.afterClosed().subscribe((result) => {
+      if (result) {
+        this.http.delete(`http://localhost:8080/api/users/${id}`, this.getHeaders()).subscribe({
+          next: () => {
+            this.snackBar.open('Utilisateur supprimé avec succès.', 'Fermer', { 
+              duration: 3000, 
+              horizontalPosition: 'end', 
+              verticalPosition: 'top', 
+              panelClass: ['success-snackbar'] 
+            });
+            // 👈 Recharge immédiatement les données après suppression
+            this.chargerUtilisateurs();
+          },
+          error: () => {
+            this.snackBar.open('Erreur lors de la suppression.', 'Fermer', { 
+              duration: 3000, 
+              horizontalPosition: 'end', 
+              verticalPosition: 'top', 
+              panelClass: ['error-snackbar'] 
+            });
+          },
+        });
+      }
+    });
   }
 }

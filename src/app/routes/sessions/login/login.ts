@@ -77,10 +77,10 @@ export class Login {
       password: this.loginForm.value.password,
     }).subscribe({
       next: (res) => {
-        localStorage.setItem('auth-token', res.token);
-        localStorage.setItem('auth-user', JSON.stringify(res));
         sessionStorage.setItem('auth-token', res.token);
         sessionStorage.setItem('auth-user', JSON.stringify(res));
+
+        localStorage.clear();
 
         this.permissionsService.loadPermissions(res.roles);
 

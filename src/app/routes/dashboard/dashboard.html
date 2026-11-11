@@ -1,170 +1,207 @@
 <div class="dashboard-wrapper">
   
-  <!-- ================= BANNIÈRE D'ACCUEIL ================= -->
+  
+  <!-- ================= BANNIÈRE DYNAMIQUE ================= -->
   <div class="welcome-banner">
     <div class="welcome-text">
-      <h2>Tableau de Bord & Supervision</h2>
-      <p>Bienvenue sur votre espace de gestion des Projets de Fin d'Études.</p>
+      <h2>{{ isAdmin ? 'Tableau de Bord & Supervision' : 'Espace Étudiant PFE' }}</h2>
+      <p>{{ isAdmin ? 'Supervision globale des Projets de Fin d\'Études' : 'Bienvenue ' + userName + ' — Suivez votre projet et trouvez votre stage' }}</p>
     </div>
     <div class="quick-actions">
-      <a class="btn-action btn-primary-action" routerLink="/catalogue">
+      <button class="btn-action btn-primary-action" (click)="allerVers('/catalogue')">
         <mat-icon>search</mat-icon>
         <span>Explorer les sujets</span>
-      </a>
-      <a class="btn-action btn-outline-action" routerLink="/validation-sujets">
-        <mat-icon>check_circle</mat-icon>
-        <span>À Valider</span>
-      </a>
+      </button>
+
+      @if (isAdmin) {
+        <button class="btn-action btn-outline-action" (click)="allerVers('/admin/validation-sujets')">
+          <mat-icon>check_circle</mat-icon>
+          <span>À Valider</span>
+        </button>
+      } @else {
+        <button class="btn-action btn-outline-action" (click)="allerVers('/mon-stage')">
+          <mat-icon>post_add</mat-icon>
+          <span>Déposer mon stage</span>
+        </button>
+      }
     </div>
   </div>
 
-  <!-- ================= 4 CARTES KPI (GRILLE CSS GRID) ================= -->
-  <div class="kpi-grid">
+  <!-- ================= SI C'EST UN ADMIN ================= -->
+  @if (isAdmin) {
     
-    <!-- 1. TOTAL SUJETS -->
-    <div class="interactive-card card-indigo" routerLink="/catalogue">
-      <div class="card-top">
-        <div class="icon-bubble">
-          <mat-icon>assignment</mat-icon>
-        </div>
-        <span class="live-pill">Direct</span>
+    <div class="kpi-grid">
+      <div class="interactive-card card-indigo" (click)="allerVers('/catalogue')">
+        <div class="card-top"><div class="icon-bubble"><mat-icon>assignment</mat-icon></div><span class="live-pill">Direct</span></div>
+        <div class="card-metric"><span class="metric-label">TOTAL SUJETS</span><h2 class="metric-value">{{ stats[0].amount }}</h2></div>
+        <div class="card-bottom"><span class="card-link-text">Consulter le catalogue</span><mat-icon class="arrow-icon">arrow_forward</mat-icon></div>
       </div>
-      <div class="card-metric">
-        <span class="metric-label">TOTAL SUJETS</span>
-        <h2 class="metric-value">{{ stats[0].amount }}</h2>
+
+      <div class="interactive-card card-teal" (click)="allerVers('/annuaire/entreprises')">
+        <div class="card-top"><div class="icon-bubble"><mat-icon>business</mat-icon></div><span class="live-pill">Partenaires</span></div>
+        <div class="card-metric"><span class="metric-label">ENTREPRISES</span><h2 class="metric-value">{{ stats[1].amount }}</h2></div>
+        <div class="card-bottom"><span class="card-link-text">Voir les entreprises</span><mat-icon class="arrow-icon">arrow_forward</mat-icon></div>
       </div>
-      <div class="card-bottom">
-        <span class="card-link-text">Consulter le catalogue</span>
-        <mat-icon class="arrow-icon">arrow_forward</mat-icon>
+
+      <div class="interactive-card card-purple" (click)="allerVers('/annuaire/laboratoires')">
+        <div class="card-top"><div class="icon-bubble"><mat-icon>domain</mat-icon></div><span class="live-pill">Recherche</span></div>
+        <div class="card-metric"><span class="metric-label">LABORATOIRES</span><h2 class="metric-value">{{ stats[2].amount }}</h2></div>
+        <div class="card-bottom"><span class="card-link-text">Voir les unités</span><mat-icon class="arrow-icon">arrow_forward</mat-icon></div>
+      </div>
+
+      <div class="interactive-card card-amber" (click)="allerVers('/admin/validation-sujets')">
+        <div class="card-top"><div class="icon-bubble"><mat-icon>schedule</mat-icon></div><span class="live-pill pill-alert">Urgent</span></div>
+        <div class="card-metric"><span class="metric-label">EN ATTENTE</span><h2 class="metric-value">{{ stats[3].amount }}</h2></div>
+        <div class="card-bottom"><span class="card-link-text">Traiter les demandes</span><mat-icon class="arrow-icon">arrow_forward</mat-icon></div>
       </div>
     </div>
 
-    <!-- 2. ENTREPRISES -->
-    <div class="interactive-card card-teal" routerLink="/entreprises">
-      <div class="card-top">
-        <div class="icon-bubble">
-          <mat-icon>business</mat-icon>
-        </div>
-        <span class="live-pill">Partenaires</span>
-      </div>
-      <div class="card-metric">
-        <span class="metric-label">ENTREPRISES</span>
-        <h2 class="metric-value">{{ stats[1].amount }}</h2>
-      </div>
-      <div class="card-bottom">
-        <span class="card-link-text">Voir les entreprises</span>
-        <mat-icon class="arrow-icon">arrow_forward</mat-icon>
-      </div>
-    </div>
-
-    <!-- 3. LABORATOIRES -->
-    <div class="interactive-card card-purple" routerLink="/laboratoires">
-      <div class="card-top">
-        <div class="icon-bubble">
-          <mat-icon>biotech</mat-icon>
-        </div>
-        <span class="live-pill">Recherche</span>
-      </div>
-      <div class="card-metric">
-        <span class="metric-label">LABORATOIRES</span>
-        <h2 class="metric-value">{{ stats[2].amount }}</h2>
-      </div>
-      <div class="card-bottom">
-        <span class="card-link-text">Voir les unités</span>
-        <mat-icon class="arrow-icon">arrow_forward</mat-icon>
-      </div>
-    </div>
-
-    <!-- 4. EN ATTENTE -->
-    <div class="interactive-card card-amber" routerLink="/validation-sujets">
-      <div class="card-top">
-        <div class="icon-bubble">
-          <mat-icon>schedule</mat-icon>
-        </div>
-        <span class="live-pill pill-alert">Urgent</span>
-      </div>
-      <div class="card-metric">
-        <span class="metric-label">EN ATTENTE</span>
-        <h2 class="metric-value">{{ stats[3].amount }}</h2>
-      </div>
-      <div class="card-bottom">
-        <span class="card-link-text">Traiter les demandes</span>
-        <mat-icon class="arrow-icon">arrow_forward</mat-icon>
-      </div>
-    </div>
-
-  </div>
-
-  <!-- ================= LIGNE 2 : ANALYTIQUES & SYSTÈME ================= -->
-  <div class="content-grid">
-    
-    <!-- Colonne Gauche : Répartition par Technologie -->
-    <div class="content-panel">
-      <div class="panel-header">
-        <div>
-          <h3 class="panel-title">Répartition par Technologie</h3>
-          <p class="panel-subtitle">Compétences sollicitées dans les sujets validés</p>
-        </div>
-        <span class="badge-subtle">Temps réel</span>
-      </div>
-
-      <div class="panel-body">
-        @if (techList.length === 0) {
-          <p class="empty-text">Aucun sujet répertorié pour le moment.</p>
-        } @else {
+    <!-- Section analytique Admin -->
+    <div class="content-grid">
+      <div class="content-panel">
+        <div class="panel-header"><h3 class="panel-title">Répartition par Technologie</h3><span class="badge-subtle">Temps réel</span></div>
+        <div class="panel-body">
           <div class="tech-stack-list">
             @for (tech of techList; track $index) {
               <div class="tech-row">
-                <div class="tech-header">
-                  <span class="tech-name">{{ tech.name }}</span>
-                  <div class="tech-stats">
-                    <span class="count-tag">{{ tech.count }} sujet(s)</span>
-                    <span class="pct-tag">{{ tech.percentage }}%</span>
-                  </div>
-                </div>
-                <div class="progress-track">
-                  <div class="progress-bar-glow" [style.width.%]="tech.percentage"></div>
-                </div>
+                <div class="tech-header"><span class="tech-name">{{ tech.name }}</span><span class="pct-tag">{{ tech.percentage }}%</span></div>
+                <div class="progress-track"><div class="progress-bar-glow" [style.width.%]="tech.percentage"></div></div>
               </div>
             }
           </div>
-        }
-      </div>
-    </div>
-
-    <!-- Colonne Droite : Informations Système -->
-    <div class="content-panel">
-      <div class="panel-header">
-        <div>
-          <h3 class="panel-title">Informations Système</h3>
-          <p class="panel-subtitle">Disponibilité et configuration</p>
         </div>
       </div>
 
-      <div class="panel-body">
-        <p class="desc-info">
-          Plateforme centralisée de gestion des PFE, coordination des unités de recherche et des partenaires industriels.
-        </p>
-
-        <div class="system-list">
-          <div class="system-row">
-            <span class="sys-item">Validation des sujets</span>
-            <span class="status-badge status-green">Active</span>
-          </div>
-
-          <div class="system-row">
-            <span class="sys-item">Session académique</span>
-            <span class="academic-year">2024 — 2025</span>
-          </div>
-
-          <div class="system-row">
-            <span class="sys-item">Serveur Backend</span>
-            <span class="status-badge status-blue">Connecté (8080)</span>
+      <div class="content-panel">
+        <div class="panel-header"><h3 class="panel-title">Informations Système</h3></div>
+        <div class="panel-body">
+          <div class="system-list">
+            <div class="system-row"><span class="sys-item">Validation des sujets</span><span class="status-badge status-green">Active</span></div>
+            <div class="system-row"><span class="sys-item">Session académique</span><span class="academic-year">2024 — 2025</span></div>
+            <div class="system-row"><span class="sys-item">Serveur Backend</span><span class="status-badge status-blue">Connecté (8080)</span></div>
           </div>
         </div>
       </div>
     </div>
 
-  </div>
+  } 
+  
+  <!-- ================= SI C'EST UN ÉTUDIANT (YASSINE) ================= -->
+  @else {
+    
+    <!-- 4 Cartes spécifiques pour l'Étudiant -->
+    <div class="kpi-grid">
+      
+      <!-- 1. Mon Dossier Stage -->
+      <div class="interactive-card card-indigo" (click)="allerVers('/mon-stage')">
+        <div class="card-top">
+          <div class="icon-bubble"><mat-icon>school</mat-icon></div>
+          <span class="live-pill">Personnel</span>
+        </div>
+        <div class="card-metric">
+          <span class="metric-label">MON STAGE PFE</span>
+          <h2 class="metric-value" style="font-size: 22px;">Dossier & Suivi</h2>
+        </div>
+        <div class="card-bottom">
+          <span class="card-link-text">Voir l'état de validation</span>
+          <mat-icon class="arrow-icon">arrow_forward</mat-icon>
+        </div>
+      </div>
+
+      <!-- 2. Catalogue des offres -->
+      <div class="interactive-card card-teal" (click)="allerVers('/catalogue')">
+        <div class="card-top">
+          <div class="icon-bubble"><mat-icon>library_books</mat-icon></div>
+          <span class="live-pill">Offres</span>
+        </div>
+        <div class="card-metric">
+          <span class="metric-label">SUJETS DISPONIBLES</span>
+          <h2 class="metric-value">{{ stats[0].amount }}</h2>
+        </div>
+        <div class="card-bottom">
+          <span class="card-link-text">Consulter le catalogue</span>
+          <mat-icon class="arrow-icon">arrow_forward</mat-icon>
+        </div>
+      </div>
+
+      <!-- 3. Entreprises Partenaires -->
+      <div class="interactive-card card-purple" (click)="allerVers('/annuaire/entreprises')">
+        <div class="card-top">
+          <div class="icon-bubble"><mat-icon>business</mat-icon></div>
+          <span class="live-pill">Réseau</span>
+        </div>
+        <div class="card-metric">
+          <span class="metric-label">ENTREPRISES PARTENAIRES</span>
+          <h2 class="metric-value">{{ stats[1].amount }}</h2>
+        </div>
+        <div class="card-bottom">
+          <span class="card-link-text">Voir les contacts RH</span>
+          <mat-icon class="arrow-icon">arrow_forward</mat-icon>
+        </div>
+      </div>
+
+      <!-- 4. Laboratoires de Recherche -->
+      <div class="interactive-card card-amber" (click)="allerVers('/annuaire/laboratoires')">
+        <div class="card-top">
+          <div class="icon-bubble"><mat-icon>domain</mat-icon></div>
+          <span class="live-pill">R&D</span>
+        </div>
+        <div class="card-metric">
+          <span class="metric-label">LABORATOIRES ENSI</span>
+          <h2 class="metric-value">{{ stats[2].amount }}</h2>
+        </div>
+        <div class="card-bottom">
+          <span class="card-link-text">Consulter les unités</span>
+          <mat-icon class="arrow-icon">arrow_forward</mat-icon>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Section d'aide pour l'Étudiant -->
+    <div class="content-grid">
+      <div class="content-panel">
+        <div class="panel-header">
+          <div>
+            <h3 class="panel-title">Procédure de validation du PFE</h3>
+            <p class="panel-subtitle">Les étapes indispensables pour valider votre stage</p>
+          </div>
+        </div>
+        <div class="panel-body">
+          <div class="system-list">
+            <div class="system-row">
+              <span class="sys-item">1. Trouver une offre sur le catalogue ou en entreprise</span>
+              <span class="status-badge status-blue">Étape 1</span>
+            </div>
+            <div class="system-row">
+              <span class="sys-item">2. Déposer votre sujet sur l'onglet "Mon Stage PFE"</span>
+              <span class="status-badge status-blue">Étape 2</span>
+            </div>
+            <div class="system-row">
+              <span class="sys-item">3. Validation par la commission des stages</span>
+              <span class="status-badge status-green">En cours</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="content-panel">
+        <div class="panel-header">
+          <div>
+            <h3 class="panel-title">Session Académique</h3>
+            <p class="panel-subtitle">Calendrier officiel</p>
+          </div>
+        </div>
+        <div class="panel-body">
+          <div class="system-list">
+            <div class="system-row"><span class="sys-item">Année universitaire</span><span class="academic-year">2024 — 2025</span></div>
+            <div class="system-row"><span class="sys-item">Durée obligatoire</span><span class="academic-year">4 à 6 mois</span></div>
+            <div class="system-row"><span class="sys-item">Établissement</span><span class="academic-year">ENSI Manouba</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  }
 
 </div>

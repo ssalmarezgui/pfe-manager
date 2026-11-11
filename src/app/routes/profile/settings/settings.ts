@@ -44,7 +44,7 @@ export class ProfileSettings implements OnInit {
   });
 
   private getHeaders(): { headers: HttpHeaders } {
-    const token = localStorage.getItem('auth-token') || sessionStorage.getItem('auth-token');
+    const token = sessionStorage.getItem('auth-token');
     return {
       headers: new HttpHeaders({
         Authorization: `Bearer ${token}`,
@@ -71,26 +71,22 @@ export class ProfileSettings implements OnInit {
     this.isSubmitting = true;
     const formValue = this.userForm.value;
 
+    // Payload épuré : on envoie uniquement les champs modifiables par le profil
     const payload: any = {
+      id: this.currentUser.id,
       nom: formValue.nom,
       prenom: formValue.prenom,
+      email: this.currentUser.email,
       tel: formValue.tel,
     };
 
+    // N'ajoute le mot de passe que s'il a été rempli
     if (formValue.nouveauMotDePasse && formValue.nouveauMotDePasse.trim()) {
       payload.password = formValue.nouveauMotDePasse;
+    } else {
+      payload.password = this.currentUser.password; // Conserve l'ancien si non modifié
     }
 
-    // Mise à jour de l'objet utilisateur localement
-    const newUserData = {
-      ...this.currentUser,
-      nom: payload.nom,
-      prenom: payload.prenom,
-      tel: payload.tel,
-      name: `${payload.prenom} ${payload.nom}`,
-    };
-
-    // Appel au backend
     this.http
       .put<any>(
         `http://localhost:8080/api/users/${this.currentUser.id}`,
@@ -98,25 +94,34 @@ export class ProfileSettings implements OnInit {
         this.getHeaders()
       )
       .subscribe({
-        next: () => {
+        next: (updatedUser) => {
+          // Fusionner proprement avec l'utilisateur actuel
+          const newUserData = {
+            ...this.currentUser,
+            ...updatedUser,
+            name: `${payload.prenom} ${payload.nom}`,
+          };
+
           localStorage.setItem('auth-user', JSON.stringify(newUserData));
           if (sessionStorage.getItem('auth-user')) {
             sessionStorage.setItem('auth-user', JSON.stringify(newUserData));
           }
+
           this.isSubmitting = false;
-          this.snackBar.open('Profil mis à jour avec succès !', 'Fermer', { duration: 3000 });
+          this.snackBar.open('Profil mis à jour avec succès !', 'Fermer', {
+            duration: 3000,
+          });
+
           setTimeout(() => {
             this.router.navigateByUrl('/profile/overview');
-          }, 400);
+          }, 500);
         },
-        error: () => {
-          // Si le backend n'a pas encore de PUT, sauvegarde quand même dans le navigateur
-          localStorage.setItem('auth-user', JSON.stringify(newUserData));
+        error: (err) => {
+          console.error('Erreur API Put User:', err);
           this.isSubmitting = false;
-          this.snackBar.open('Profil enregistré !', 'Fermer', { duration: 3000 });
-          setTimeout(() => {
-            this.router.navigateByUrl('/profile/overview');
-          }, 400);
+          this.snackBar.open('Erreur lors de la mise à jour sur le serveur.', 'Fermer', {
+            duration: 3500,
+          });
         },
       });
   }

@@ -7,7 +7,7 @@
   <ul navAccordion class="matero-sidemenu level-{{ level }}" [class.submenu]="level > 0">
     @for (menuItem of menuList; track $index) {
       
-      <!-- ✅ FILTRE ACTIF : Affiche uniquement si autorisé pour le rôle -->
+      <!-- FILTRE ACTIF : Affiche uniquement si autorisé pour le rôle -->
       @if (canShowMenuItem(menuItem)) {
         <li class="menu-item" navAccordionItem [route]="menuItem.route" routerLinkActive="active">
           

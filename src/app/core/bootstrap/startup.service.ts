@@ -1,49 +1,59 @@
-import { Service, inject } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { AuthService, User } from '@core/authentication';
 import { NgxPermissionsService, NgxRolesService } from 'ngx-permissions';
-import { switchMap, tap } from 'rxjs';
+import { tap } from 'rxjs';
 import { Menu, MenuService } from './menu.service';
 
-@Service()
+@Injectable({
+  providedIn: 'root',
+})
 export class StartupService {
   private readonly authService = inject(AuthService);
   private readonly menuService = inject(MenuService);
-  private readonly permissonsService = inject(NgxPermissionsService);
+  private readonly permissionsService = inject(NgxPermissionsService);
   private readonly rolesService = inject(NgxRolesService);
 
-  /**
-   * Load the application only after get the menu or other essential informations
-   * such as permissions and roles.
-   */
+  private readonly pfeMenu: Menu[] = [
+    { route: 'dashboard', name: 'Tableau de Bord', type: 'link', icon: 'dashboard' },
+    { route: 'catalogue', name: 'Catalogue des Sujets', type: 'link', icon: 'library_books' },
+    { route: 'annuaire/entreprises', name: 'Entreprises', type: 'link', icon: 'business' },
+    { route: 'annuaire/laboratoires', name: 'Laboratoires', type: 'link', icon: 'domain' },
+    { route: 'mon-stage', name: 'Mon Stage PFE', type: 'link', icon: 'school'},
+    { route: 'admin/validation-sujets', name: 'Validation des Sujets', type: 'link', icon: 'check_circle' },
+    { route: 'admin/utilisateurs', name: 'Gestion Utilisateurs', type: 'link', icon: 'people' },
+  ];
+
   load() {
-    return new Promise<void>((resolve, reject) => {
-      this.authService
-        .change()
-        .pipe(
-          tap(user => this.setPermissions(user)),
-          switchMap(() => this.authService.menu()),
-          tap(menu => this.setMenu(menu))
-        )
-        .subscribe({
-          next: () => resolve(),
-          error: () => resolve(),
-        });
+    return new Promise<void>((resolve) => {
+      this.authService.change().pipe(
+        tap(user => this.setPermissions(user)),
+        tap(() => this.menuService.set(this.pfeMenu))
+      ).subscribe({
+        next: () => resolve(),
+        error: () => resolve(),
+      });
     });
   }
 
-  private setMenu(menu: Menu[]) {
-    this.menuService.addNamespace(menu, 'menu');
-    this.menuService.set(menu);
-  }
-
   private setPermissions(user: User) {
-    // In a real app, you should get permissions and roles from the user information.
-    const permissions = ['canAdd', 'canDelete', 'canEdit', 'canRead'];
-    this.permissonsService.loadPermissions(permissions);
-    this.rolesService.flushRoles();
-    this.rolesService.addRoles({ ADMIN: permissions });
+    if (!user || !user.roles) {
+      this.rolesService.addRoles({ GUEST: [] });
+      return;
+    }
 
-    // Tips: Alternatively you can add permissions with role at the same time.
-    // this.rolesService.addRolesWithPermissions({ ADMIN: permissions });
+    // 1. Nettoyer les rôles existants
+    this.rolesService.flushRoles();
+
+    // 2. Extraire les rôles du backend (Spring Boot renvoie souvent une liste d'objets {libelle: 'ROLE_...'})
+    const userRoles = user.roles.map((r: any) => (typeof r === 'string' ? r : r.libelle).replace('ROLE_', ''));
+    
+    // 3. Charger les rôles dynamiquement dans NgxRolesService
+    const rolesConfig: any = {};
+    userRoles.forEach(role => {
+      rolesConfig[role] = ['canAdd', 'canDelete', 'canEdit', 'canRead'];
+    });
+
+    this.rolesService.addRoles(rolesConfig);
+    console.log("Rôles appliqués :", rolesConfig);
   }
 }

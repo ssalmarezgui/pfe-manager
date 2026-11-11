@@ -9,6 +9,8 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatTableModule } from '@angular/material/table';
 import { MatIconModule } from '@angular/material/icon';
 import { MatSnackBar } from '@angular/material/snack-bar';
+import { TemplateRef, ViewChild } from '@angular/core';
+import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 
 @Component({
   selector: 'app-mes-sujets',
@@ -22,6 +24,7 @@ import { MatSnackBar } from '@angular/material/snack-bar';
     MatButtonModule,
     MatTableModule,
     MatIconModule,
+    MatDialogModule,
   ],
   templateUrl: './mes-sujets.html',
   styleUrl: './mes-sujets.scss',
@@ -46,7 +49,7 @@ export class MesSujets implements OnInit {
   isSubmitting = false;
 
   private getHeaders(): { headers: HttpHeaders } {
-    const token = localStorage.getItem('auth-token') || sessionStorage.getItem('auth-token');
+    const token = sessionStorage.getItem('auth-token');
     return {
       headers: new HttpHeaders({
         'Authorization': `Bearer ${token}`
@@ -148,15 +151,39 @@ export class MesSujets implements OnInit {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }
 
+  // 1. Déclarer le dialogue et récupérer le HTML
+  private readonly dialog = inject(MatDialog);
+  @ViewChild('confirmDialog') confirmDialogTemplate!: TemplateRef<any>;
+
+  // 2. La nouvelle fonction moderne
   supprimer(id: number): void {
-    if (confirm('Voulez-vous réellement supprimer ce sujet ?')) {
-      this.http.delete(`http://localhost:8080/api/sujets/${id}`, this.getHeaders()).subscribe({
-        next: () => {
-          this.snackBar.open('Sujet supprimé avec succès.', 'Fermer', { duration: 3000 });
-          this.chargerMesSujets();
-        },
-      });
-    }
+    // Ouvre la belle popup
+    const dialogRef = this.dialog.open(this.confirmDialogTemplate, {
+      width: '380px',
+      panelClass: 'modern-dialog',
+      autoFocus: false
+    });
+
+    // Écoute la réponse du clic
+    dialogRef.afterClosed().subscribe((result) => {
+      if (result) {
+        // Si on a cliqué sur "Oui, Supprimer" (result = true)
+        this.http.delete(`http://localhost:8080/api/sujets/${id}`, this.getHeaders()).subscribe({
+          next: () => {
+            this.snackBar.open('Élément supprimé avec succès.', 'Fermer', { 
+              duration: 3000, horizontalPosition: 'end', verticalPosition: 'top', panelClass: ['success-snackbar'] 
+            });
+            // N'oubliez pas d'appeler ici la fonction pour rafraîchir la liste !
+            // Ex: this.chargerUtilisateurs(); OU this.chargerMesSujets();
+          },
+          error: () => {
+            this.snackBar.open('Erreur lors de la suppression.', 'Fermer', { 
+              duration: 3000, horizontalPosition: 'end', verticalPosition: 'top', panelClass: ['error-snackbar'] 
+            });
+          },
+        });
+      }
+    });
   }
 
   reinitialiserFormulaire(): void {

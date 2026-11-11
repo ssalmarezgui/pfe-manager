@@ -75,7 +75,7 @@
               <span class="sector-tag">{{ sujet.entreprise.secteur }}</span>
             } @else if (sujet.labo) {
               <span class="origin-pill origin-labo">
-                <mat-icon>biotech</mat-icon>
+                <mat-icon>domain</mat-icon>
                 <span>Labo: {{ sujet.labo.nom }}</span>
               </span>
               <span class="sector-tag">{{ sujet.labo.etablissement }}</span>
@@ -117,10 +117,12 @@
               Validé
             </span>
 
-            <button class="btn-apply" (click)="postuler(sujet)">
-              <mat-icon>mail_outline</mat-icon>
-              <span>Postuler</span>
-            </button>
+            @if (isEtudiant()) {
+              <button class="btn-apply" (click)="postuler(sujet)">
+                <mat-icon>mail_outline</mat-icon>
+                <span>Postuler</span>
+              </button>
+            }
           </div>
 
         </div>

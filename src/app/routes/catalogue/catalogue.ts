@@ -35,7 +35,7 @@ export class Catalogue implements OnInit {
   isLoading = false;
 
   private getHeaders(): { headers: HttpHeaders } {
-    const token = localStorage.getItem('auth-token') || sessionStorage.getItem('auth-token');
+    const token = sessionStorage.getItem('auth-token');
     return { headers: new HttpHeaders({ 'Authorization': `Bearer ${token}` }) };
   }
 
@@ -97,5 +97,22 @@ export class Catalogue implements OnInit {
     );
 
     window.location.href = `mailto:${contactEmail}?subject=${sujetEmail}&body=${corpsEmail}`;
+  }
+
+  isEtudiant(): boolean {
+    const userStr = localStorage.getItem('auth-user') || sessionStorage.getItem('auth-user');
+    if (!userStr) return false;
+
+    try {
+      const user = JSON.parse(userStr);
+      const roles: string[] = (user.roles || []).map((r: any) => 
+        (typeof r === 'string' ? r : (r.libelle || r.name || '')).toUpperCase()
+      );
+      
+      // Retourne vrai UNIQUEMENT s'il a le rôle Étudiant
+      return roles.some(r => r.includes('ETUDIANT') || r.includes('STUDENT'));
+    } catch (e) {
+      return false;
+    }
   }
 }

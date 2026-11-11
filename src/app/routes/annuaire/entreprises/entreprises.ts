@@ -33,7 +33,7 @@ export class Entreprises implements OnInit {
   searchTerm: string = '';
 
   private getHeaders(): { headers: HttpHeaders } {
-    const token = localStorage.getItem('auth-token') || sessionStorage.getItem('auth-token');
+    const token = sessionStorage.getItem('auth-token');
     return {
       headers: new HttpHeaders({
         'Authorization': `Bearer ${token}`

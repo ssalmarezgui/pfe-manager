@@ -384,3 +384,26 @@
 @keyframes spin {
   to { transform: rotate(360deg); }
 }
+
+/* --- TOASTS MODERNES (SUCCÈS ET ERREUR) --- */
+.success-snackbar {
+  .mdc-snackbar__surface {
+    background-color: #10b981 !important;
+    border-radius: 8px !important;
+  }
+  .mdc-snackbar__label, .mat-mdc-button .mdc-button__label {
+    color: #ffffff !important;
+    font-weight: 600 !important;
+  }
+}
+
+.error-snackbar {
+  .mdc-snackbar__surface {
+    background-color: #ef4444 !important;
+    border-radius: 8px !important;
+  }
+  .mdc-snackbar__label, .mat-mdc-button .mdc-button__label {
+    color: #ffffff !important;
+    font-weight: 600 !important;
+  }
+}

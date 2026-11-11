@@ -4,6 +4,7 @@ import { CommonModule } from '@angular/common';
 import { Router, RouterLink } from '@angular/router';
 import { MatCardModule } from '@angular/material/card';
 import { MatIconModule } from '@angular/material/icon';
+import { MatButtonModule } from '@angular/material/button';
 import { MtxProgressModule } from '@ng-matero/extensions/progress';
 
 @Component({
@@ -16,6 +17,7 @@ import { MtxProgressModule } from '@ng-matero/extensions/progress';
     RouterLink, 
     MatCardModule, 
     MatIconModule, 
+    MatButtonModule,
     MtxProgressModule
   ],
 })
@@ -23,6 +25,10 @@ export class Dashboard implements OnInit {
   private readonly http = inject(HttpClient);
   private readonly router = inject(Router);
   private readonly cdr = inject(ChangeDetectorRef);
+
+  // Variable de rôle calculée au démarrage
+  isAdmin = false;
+  userName = 'Étudiant';
 
   stats = [
     { title: 'Total Sujets', amount: '0', progress: 70 },
@@ -34,6 +40,22 @@ export class Dashboard implements OnInit {
   techList: { name: string; count: number; percentage: number }[] = [];
 
   ngOnInit(): void {
+    // 1. Détection stricte du rôle
+    const raw = localStorage.getItem('auth-user') || sessionStorage.getItem('auth-user');
+    if (raw) {
+      try {
+        const user = JSON.parse(raw);
+        this.userName = `${user.prenom || ''} ${user.nom || ''}`.trim() || 'Étudiant';
+        const roles: string[] = (user.roles || []).map((r: any) => 
+          (typeof r === 'string' ? r : (r.libelle || r.name || '')).toUpperCase()
+        );
+        this.isAdmin = roles.some(r => r.includes('ADMIN'));
+      } catch (e) {
+        this.isAdmin = false;
+      }
+    }
+
+    // 2. Chargement des statistiques
     this.http.get<any>('http://localhost:8080/api/dashboard/stats').subscribe({
       next: (data) => {
         this.stats[0].amount = String(data.totalSujets ?? 0);
@@ -58,7 +80,6 @@ export class Dashboard implements OnInit {
     });
   }
 
-  // ✅ Redirection garantie au clic
   allerVers(url: string): void {
     this.router.navigateByUrl(url);
   }

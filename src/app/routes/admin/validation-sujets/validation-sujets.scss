@@ -234,49 +234,93 @@
   }
 }
 
-/* --- CELLULE DÉPOSANT (PILL ORIGINE) --- */
+/* --- CELLULE DÉPOSANT (BADGES 100% ALIGNÉS AU MILLIMÈTRE) --- */
 .depositor-pill {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  padding: 4px 10px;
-  border-radius: 8px;
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 12px !important;
+  padding: 0 14px !important;
+  border-radius: 10px !important;
+  
+  /* VERROUILLAGE TOTAL DE LA TAILLE */
+  height: 44px !important; 
+  width: 230px !important;      /* 👈 Largeur Fixe ! Tous les badges feront 230px ! */
+  min-width: 230px !important;
+  max-width: 230px !important;
+  box-sizing: border-box !important;
+
+  /* Couleur unifiée (Indigo/Bleu) */
+  background: #eef2ff !important;
+  color: #4f46e5 !important;
+  border: 1px solid #c7d2fe !important;
 
   mat-icon {
-    font-size: 18px;
-    width: 18px;
-    height: 18px;
+    font-size: 22px !important;
+    width: 22px !important;
+    height: 22px !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    color: #4f46e5 !important;
+    flex-shrink: 0 !important;
   }
 
   .dep-info {
-    display: flex;
-    flex-direction: column;
+    display: flex !important;
+    flex-direction: column !important;
+    justify-content: center !important;
+    text-align: left !important;
+    overflow: hidden !important;
+    width: 100% !important; /* Le texte prend toute la place restante */
 
     .dep-name {
-      font-weight: 700;
-      font-size: 12.5px;
-      line-height: 1.2;
+      font-weight: 700 !important;
+      font-size: 13px !important;
+      margin: 0 0 2px 0 !important;
+      line-height: 1.2 !important;
+      white-space: nowrap !important;
+      overflow: hidden !important;
+      text-overflow: ellipsis !important; /* Coupe proprement si c'est trop long */
+      display: block !important;
     }
 
     .dep-type {
-      font-size: 10.5px;
-      opacity: 0.8;
+      font-size: 11px !important;
+      font-weight: 600 !important;
+      opacity: 0.8 !important;
+      margin: 0 !important;
+      line-height: 1 !important;
     }
   }
 
-  &.dep-entreprise {
+  /* Badge Inconnu (Gris pointillé) */
+  &.depositor-unknown {
+    background: #f9fafb !important;
+    color: #6b7280 !important;
+    border: 1px dashed #d1d5db !important;
+
+    mat-icon {
+      color: #9ca3af !important;
+    }
+  }
+}
+
+.badge-doc {
+  width: 28px;
+  height: 28px;
+  border-radius: 6px;
+  background: #f3f4f6;
+  color: #9ca3af;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  mat-icon { font-size: 16px; width: 16px; height: 16px; }
+
+  &.doc-ok {
     background: #ecfdf5;
-    color: #047857;
-  }
-
-  &.dep-labo {
-    background: #f5f3ff;
-    color: #6d28d9;
-  }
-
-  &.dep-etudiant {
-    background: #eff6ff;
-    color: #1d4ed8;
+    color: #059669; // Vert si déposé par l'étudiant !
+    border: 1px solid #a7f3d0;
   }
 }
 
@@ -297,14 +341,31 @@
   }
 }
 
+/* --- DURÉE (Alignement Horizontal Forcé) --- */
 .duration-badge {
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
+  display: inline-flex !important;
+  flex-direction: row !important; /* Force l'alignement sur une seule ligne */
+  align-items: center !important;
+  justify-content: flex-start !important;
+  gap: 6px !important;
   color: #4b5563;
-  font-size: 12px;
+  font-size: 12.5px;
+  font-weight: 500;
+  white-space: nowrap !important; /* Empêche le retour à la ligne */
 
-  mat-icon { font-size: 15px; width: 15px; height: 15px; color: #9ca3af; }
+  mat-icon {
+    font-size: 16px !important;
+    width: 16px !important;
+    height: 16px !important;
+    color: #9ca3af;
+    margin: 0 !important;
+  }
+  
+  span {
+    display: inline-block !important;
+    margin: 0 !important;
+    line-height: 1 !important;
+  }
 }
 
 /* --- STATUS PILLS --- */

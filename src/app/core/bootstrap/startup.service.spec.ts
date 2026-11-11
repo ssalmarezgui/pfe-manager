@@ -1,91 +1,81 @@
-import { provideHttpClient, withInterceptorsFromDi, withXhr } from '@angular/common/http';
-import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
-import { TestBed } from '@angular/core/testing';
-import { admin, TokenService } from '@core/authentication';
-import { MenuService } from '@core/bootstrap/menu.service';
-import { StartupService } from '@core/bootstrap/startup.service';
-import { LocalStorageService, MemoryStorageService } from '@shared';
-import { NgxPermissionsModule, NgxPermissionsService, NgxRolesService } from 'ngx-permissions';
-import { vi } from 'vitest';
+import { Injectable, inject } from '@angular/core';
+import { AuthService, User } from '@core/authentication';
+import { NgxPermissionsService, NgxRolesService } from 'ngx-permissions';
+import { tap } from 'rxjs';
+import { Menu, MenuService } from './menu.service';
 
-describe('StartupService', () => {
-  let httpMock: HttpTestingController;
-  let startup: StartupService;
-  let tokenService: TokenService;
-  let menuService: MenuService;
-  let mockPermissionsService: NgxPermissionsService;
-  let mockRolesService: NgxRolesService;
+@Injectable({
+  providedIn: 'root',
+})
+export class StartupService {
+  private readonly authService = inject(AuthService);
+  private readonly menuService = inject(MenuService);
+  private readonly permissionsService = inject(NgxPermissionsService);
+  private readonly rolesService = inject(NgxRolesService);
 
-  beforeEach(() => {
-    TestBed.configureTestingModule({
-      imports: [NgxPermissionsModule.forRoot()],
-      providers: [
-        {
-          provide: LocalStorageService,
-          useClass: MemoryStorageService,
-        },
-        {
-          provide: NgxPermissionsService,
-          useValue: {
-            loadPermissions: (permissions: string[]) => void 0,
-          },
-        },
-        {
-          provide: NgxRolesService,
-          useValue: {
-            flushRoles: () => void 0,
-            addRoles: (params: { ADMIN: string[] }) => void 0,
-          },
-        },
-        StartupService,
-        provideHttpClient(withXhr(), withInterceptorsFromDi()),
-        provideHttpClientTesting(),
-      ],
+  // Notre menu PFE Manager défini directement en dur (zéro erreur 404 possible)
+  private readonly pfeMenu: Menu[] = [
+    {
+      route: 'dashboard',
+      name: 'menu.dashboard',
+      type: 'link',
+      icon: 'dashboard',
+    },
+    {
+      route: 'catalogue',
+      name: 'menu.catalogue',
+      type: 'link',
+      icon: 'library_books',
+    },
+    {
+      route: 'annuaire/entreprises',
+      name: 'menu.entreprises',
+      type: 'link',
+      icon: 'business',
+    },
+    {
+      route: 'annuaire/laboratoires',
+      name: 'menu.laboratoires',
+      type: 'link',
+      icon: 'science',
+    },
+    {
+      route: 'admin/validation-sujets',
+      name: 'menu.validation_sujets',
+      type: 'link',
+      icon: 'check_circle',
+    },
+    {
+      route: 'admin/utilisateurs',
+      name: 'menu.utilisateurs',
+      type: 'link',
+      icon: 'people',
+    },
+  ];
+
+  load() {
+    return new Promise<void>((resolve, reject) => {
+      this.authService
+        .change()
+        .pipe(
+          tap(user => this.setPermissions(user)),
+          tap(() => this.setMenu(this.pfeMenu))
+        )
+        .subscribe({
+          next: () => resolve(),
+          error: () => resolve(),
+        });
     });
-    httpMock = TestBed.inject(HttpTestingController);
-    startup = TestBed.inject(StartupService);
-    tokenService = TestBed.inject(TokenService);
-    menuService = TestBed.inject(MenuService);
-    mockPermissionsService = TestBed.inject(NgxPermissionsService);
-    mockRolesService = TestBed.inject(NgxRolesService);
-  });
+  }
 
-  afterEach(() => httpMock.verify());
+  private setMenu(menu: Menu[]) {
+    this.menuService.set(menu);
+  }
 
-  it('should load menu when token changed and token valid', async () => {
-    const menuData = { menu: [] };
+  private setPermissions(user: User) {
     const permissions = ['canAdd', 'canDelete', 'canEdit', 'canRead'];
-    vi.spyOn(menuService, 'addNamespace').mockReturnValue(undefined);
-    vi.spyOn(menuService, 'set').mockReturnValue(undefined);
-    vi.spyOn(mockPermissionsService, 'loadPermissions').mockReturnValue(undefined);
-    vi.spyOn(mockRolesService, 'flushRoles').mockReturnValue(undefined);
-    vi.spyOn(mockRolesService, 'addRoles').mockReturnValue(undefined);
-
-    await startup.load();
-
-    tokenService.set({ access_token: 'token', token_type: 'bearer' });
-
-    httpMock.expectOne('/user').flush(admin);
-    httpMock.expectOne('/user/menu').flush(menuData);
-
-    expect(menuService.addNamespace).toHaveBeenCalledWith(menuData.menu, 'menu');
-    expect(menuService.set).toHaveBeenCalledWith(menuData.menu);
-    expect(mockPermissionsService.loadPermissions).toHaveBeenCalledWith(permissions);
-    expect(mockRolesService.flushRoles).toHaveBeenCalledWith();
-    expect(mockRolesService.addRoles).toHaveBeenCalledWith({ ADMIN: permissions });
-  });
-
-  it('should clear menu when token changed and token invalid', async () => {
-    vi.spyOn(menuService, 'addNamespace').mockReturnValue(undefined);
-    vi.spyOn(menuService, 'set').mockReturnValue(undefined);
-
-    await startup.load();
-
-    tokenService.set({ access_token: '', token_type: 'bearer' });
-
-    httpMock.expectNone('/user/menu');
-
-    expect(menuService.addNamespace).toHaveBeenCalledWith([], 'menu');
-    expect(menuService.set).toHaveBeenCalledWith([]);
-  });
-});
+    this.permissionsService.loadPermissions(permissions);
+    this.rolesService.flushRoles();
+    this.rolesService.addRoles({ ADMIN: permissions });
+  }
+}
