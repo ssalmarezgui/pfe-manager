@@ -68,7 +68,7 @@
     "@types/node": "^26.6.0",
     "@vitest/browser-playwright": "^5.0.2",
     "@vitest/coverage-v8": "^5.0.2",
-    "angular-cli-ghpages": "^3.1.0",
+    "angular-cli-ghpages": "^3.1.2",
     "angular-eslint": "^22.5.0",
     "cpr": "^3.0.1",
     "esbuild-visualizer": "^0.7.0",
