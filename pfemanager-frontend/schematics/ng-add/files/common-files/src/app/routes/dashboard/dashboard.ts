@@ -56,7 +56,7 @@ export class Dashboard implements OnInit {
     }
 
     // 2. Chargement des statistiques
-    this.http.get<any>('http://localhost:8080/api/dashboard/stats').subscribe({
+    this.http.get<any>('/api/dashboard/stats').subscribe({
       next: (data) => {
         this.stats[0].amount = String(data.totalSujets ?? 0);
         this.stats[1].amount = String(data.totalEntreprises ?? 0);

@@ -42,7 +42,7 @@ export class Laboratoires implements OnInit {
   }
 
   ngOnInit(): void {
-    this.http.get<any[]>('http://localhost:8080/api/labos', this.getHeaders()).subscribe({
+    this.http.get<any[]>(' /api/labos', this.getHeaders()).subscribe({
       next: (data) => {
         this.laboratoires = data || [];
         this.isLoading = false;

@@ -55,7 +55,7 @@ export class Utilisateurs implements OnInit {
 
   chargerUtilisateurs(): void {
     this.isLoading = true;
-    this.http.get<any[]>('http://localhost:8080/api/users', this.getHeaders()).subscribe({
+    this.http.get<any[]>('/api/users', this.getHeaders()).subscribe({
       next: (data) => {
         // 👈 Le spread operator [...] force Angular à rafraîchir le tableau visuellement
         this.users = [...(data || [])]; 
@@ -133,7 +133,7 @@ export class Utilisateurs implements OnInit {
 
     dialogRef.afterClosed().subscribe((result) => {
       if (result) {
-        this.http.delete(`http://localhost:8080/api/users/${id}`, this.getHeaders()).subscribe({
+        this.http.delete(` /api/users/${id}`, this.getHeaders()).subscribe({
           next: () => {
             this.snackBar.open('Utilisateur supprimé avec succès.', 'Fermer', { 
               duration: 3000, 

@@ -48,10 +48,10 @@ export class Signup implements OnInit {
 
   ngOnInit(): void {
     // Charger les entreprises et les labos pour les listes deroulantes
-    this.http.get<any[]>('http://localhost:8080/api/entreprises').subscribe({
+    this.http.get<any[]>(' /api/entreprises').subscribe({
       next: (data) => (this.entreprises = data || []),
     });
-    this.http.get<any[]>('http://localhost:8080/api/labos').subscribe({
+    this.http.get<any[]>(' /api/labos').subscribe({
       next: (data) => (this.labos = data || []),
     });
   }
@@ -62,7 +62,7 @@ export class Signup implements OnInit {
     this.isSubmitting = true;
     this.errorMessage = '';
 
-    this.http.post('http://localhost:8080/api/auth/signup', this.signupForm.value).subscribe({
+    this.http.post(' /api/auth/signup', this.signupForm.value).subscribe({
       next: () => {
         alert('Compte cree avec succes ! Vous pouvez maintenant vous connecter.');
         this.router.navigateByUrl('/auth/login');

@@ -10,6 +10,10 @@ export function hasHttpScheme(url: string) {
 export function baseUrlInterceptor(req: HttpRequest<unknown>, next: HttpHandlerFn) {
   const baseUrl = inject(BASE_URL, { optional: true });
 
+  if (!baseUrl || req.url.startsWith('http') || req.url.includes('i18n/') || req.url.includes('assets/')) {
+    return next(req);
+  }
+
   const hasScheme = (url: string) => baseUrl && hasHttpScheme(url);
 
   const prependBaseUrl = (url: string) =>

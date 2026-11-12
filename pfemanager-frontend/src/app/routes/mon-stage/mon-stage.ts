@@ -128,7 +128,7 @@ export class MonStage implements OnInit {
     if (!user) return;
 
     this.isLoading = true;
-    const url = `http://localhost:8080/api/sujets/etudiant/${user.id}`;
+    const url = ` /api/sujets/etudiant/${user.id}`;
 
     this.http.get<any[]>(url, this.getHeaders()).subscribe({
       next: data => {
@@ -175,7 +175,7 @@ export class MonStage implements OnInit {
       idEtudiant: user.id,
     };
 
-    this.http.post('http://localhost:8080/api/sujets', payload, this.getHeaders()).subscribe({
+    this.http.post(' /api/sujets', payload, this.getHeaders()).subscribe({
       next: () => {
         this.form = { titre: '', technologies: '', duree: '', description: '' };
         this.isSubmitting = false;
@@ -212,7 +212,7 @@ export class MonStage implements OnInit {
 
     dialogRef.afterClosed().subscribe(result => {
       if (result) {
-        this.http.delete(`http://localhost:8080/api/sujets/${id}`, this.getHeaders()).subscribe({
+        this.http.delete(` /api/sujets/${id}`, this.getHeaders()).subscribe({
           next: () => {
             this.snackBar.open('Demande annulée. Vous pouvez déposer un nouveau sujet.', 'Fermer', {
               duration: 3500,
@@ -242,7 +242,7 @@ export class MonStage implements OnInit {
         // Envoi dans la vraie base de données MySQL
         this.http
           .post(
-            `http://localhost:8080/api/sujets/${this.stageValide.id}/documents/${doc.id}`,
+            ` /api/sujets/${this.stageValide.id}/documents/${doc.id}`,
             payload,
             this.getHeaders()
           )

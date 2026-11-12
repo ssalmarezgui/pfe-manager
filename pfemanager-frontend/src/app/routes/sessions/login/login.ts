@@ -72,7 +72,7 @@ export class Login {
   login() {
     this.isSubmitting = true;
 
-    this.http.post<any>('http://localhost:8080/api/auth/signin', {
+    this.http.post<any>(' /api/auth/signin', {
       email: this.loginForm.value.username,
       password: this.loginForm.value.password,
     }).subscribe({
