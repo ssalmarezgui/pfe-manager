@@ -3,7 +3,7 @@ import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { SujetPFE, SujetPFERequest } from '../models/sujet.model';
 
-const API_URL = ' /api/sujets';
+const API_URL = '/api/sujets';
 
 @Injectable({
   providedIn: 'root'

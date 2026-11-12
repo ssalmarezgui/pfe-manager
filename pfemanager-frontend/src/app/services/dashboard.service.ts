@@ -3,7 +3,7 @@ import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { DashboardStats } from '../models/labo.model';
 
-const API_URL = ' /api/dashboard';
+const API_URL = '/api/dashboard';
 
 @Injectable({
   providedIn: 'root'

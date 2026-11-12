@@ -45,7 +45,7 @@ export class Catalogue implements OnInit {
 
   chargerSujets(): void {
     this.isLoading = true;
-    this.http.get<any[]>(' /api/sujets/valides', this.getHeaders()).subscribe({
+    this.http.get<any[]>('/api/sujets/valides', this.getHeaders()).subscribe({
       next: (data) => {
         this.sujets = data || [];
         this.isLoading = false;
@@ -64,7 +64,7 @@ export class Catalogue implements OnInit {
     if (this.keyword.trim()) params.keyword = this.keyword.trim();
     if (this.technologie.trim()) params.technologie = this.technologie.trim();
 
-    this.http.get<any[]>(' /api/sujets/search', { params, ...this.getHeaders() }).subscribe({
+    this.http.get<any[]>('/api/sujets/search', { params, ...this.getHeaders() }).subscribe({
       next: (data) => {
         this.sujets = data || [];
         this.isLoading = false;

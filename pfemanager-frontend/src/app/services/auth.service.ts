@@ -3,7 +3,7 @@ import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { JwtResponse } from '../models/user.model';
 
-const AUTH_API = ' /api/auth/';
+const AUTH_API = '/api/auth/';
 
 const httpOptions = {
   headers: new HttpHeaders({ 'Content-Type': 'application/json' })

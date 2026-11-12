@@ -133,7 +133,7 @@ export class ValidationSujets implements OnInit {
   }
 
   valider(id: number): void {
-    this.http.patch(` /api/sujets/${id}/valider`, {}, this.getHeaders()).subscribe({
+    this.http.patch(`/api/sujets/${id}/valider`, {}, this.getHeaders()).subscribe({
       next: () => {
         this.snackBar.open('Sujet validé et publié au catalogue !', 'Fermer', { duration: 3000 });
         this.chargerTousLesSujets();
@@ -145,7 +145,7 @@ export class ValidationSujets implements OnInit {
   }
 
   refuser(id: number): void {
-    this.http.patch(` /api/sujets/${id}/refuser`, {}, this.getHeaders()).subscribe({
+    this.http.patch(`/api/sujets/${id}/refuser`, {}, this.getHeaders()).subscribe({
       next: () => {
         this.snackBar.open('Sujet refusé.', 'Fermer', { duration: 3000 });
         this.chargerTousLesSujets();
@@ -173,7 +173,7 @@ export class ValidationSujets implements OnInit {
     dialogRef.afterClosed().subscribe((result) => {
       if (result) {
         // Si on a cliqué sur "Oui, Supprimer" (result = true)
-        this.http.delete(` /api/sujets/${id}`, this.getHeaders()).subscribe({
+        this.http.delete(`/api/sujets/${id}`, this.getHeaders()).subscribe({
           next: () => {
             this.snackBar.open('Élément supprimé avec succès.', 'Fermer', { 
               duration: 3000, horizontalPosition: 'end', verticalPosition: 'top', panelClass: ['success-snackbar'] 

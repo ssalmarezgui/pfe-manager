@@ -42,7 +42,7 @@ export class Entreprises implements OnInit {
   }
 
   ngOnInit(): void {
-    this.http.get<any[]>(' /api/entreprises', this.getHeaders()).subscribe({
+    this.http.get<any[]>('/api/entreprises', this.getHeaders()).subscribe({
       next: (data) => {
         this.entreprises = data || [];
         this.isLoading = false;

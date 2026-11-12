@@ -89,7 +89,7 @@ export class ProfileSettings implements OnInit {
 
     this.http
       .put<any>(
-        ` /api/users/${this.currentUser.id}`,
+        `/api/users/${this.currentUser.id}`,
         payload,
         this.getHeaders()
       )

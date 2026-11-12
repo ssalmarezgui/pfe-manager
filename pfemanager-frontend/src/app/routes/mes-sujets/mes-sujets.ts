@@ -70,11 +70,11 @@ export class MesSujets implements OnInit {
     const user = this.getCurrentUser();
     this.isLoading = true;
 
-    let url = ' /api/sujets';
+    let url = '/api/sujets';
     if (user?.idEntreprise) {
-      url = ` /api/sujets/entreprise/${user.idEntreprise}`;
+      url = `/api/sujets/entreprise/${user.idEntreprise}`;
     } else if (user?.idLabo) {
-      url = ` /api/sujets/labo/${user.idLabo}`;
+      url = `/api/sujets/labo/${user.idLabo}`;
     }
 
     this.http.get<any[]>(url, this.getHeaders()).subscribe({
@@ -104,7 +104,7 @@ export class MesSujets implements OnInit {
     };
 
     if (this.isEditing && this.form.id) {
-      this.http.put(` /api/sujets/${this.form.id}`, payload, this.getHeaders()).subscribe({
+      this.http.put(`/api/sujets/${this.form.id}`, payload, this.getHeaders()).subscribe({
         next: () => {
           this.snackBar.open('Sujet modifié avec succès ! Statut repassé en attente de validation.', 'Fermer', {
             duration: 4000,
@@ -120,7 +120,7 @@ export class MesSujets implements OnInit {
         },
       });
     } else {
-      this.http.post(' /api/sujets', payload, this.getHeaders()).subscribe({
+      this.http.post('/api/sujets', payload, this.getHeaders()).subscribe({
         next: () => {
           this.snackBar.open('Nouveau sujet publié avec succès ! En attente de validation.', 'Fermer', {
             duration: 4000,
@@ -168,7 +168,7 @@ export class MesSujets implements OnInit {
     dialogRef.afterClosed().subscribe((result) => {
       if (result) {
         // Si on a cliqué sur "Oui, Supprimer" (result = true)
-        this.http.delete(` /api/sujets/${id}`, this.getHeaders()).subscribe({
+        this.http.delete(`/api/sujets/${id}`, this.getHeaders()).subscribe({
           next: () => {
             this.snackBar.open('Élément supprimé avec succès.', 'Fermer', { 
               duration: 3000, horizontalPosition: 'end', verticalPosition: 'top', panelClass: ['success-snackbar'] 
