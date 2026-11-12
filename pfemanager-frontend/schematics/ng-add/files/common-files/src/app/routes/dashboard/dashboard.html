@@ -1,0 +1,75 @@
+<div class="dashboard-wrapper">
+  
+  <!-- En-tête dynamique -->
+  <div class="welcome-banner">
+    <div class="welcome-text">
+      <h2>{{ isAdmin() ? 'Supervision PFE' : 'Mon Espace PFE' }}</h2>
+      <p>{{ isAdmin() ? 'Espace d\'administration des projets' : 'Gérez votre stage et consultez les opportunités' }}</p>
+    </div>
+  </div>
+
+  <!-- Grille Dynamique -->
+  <div class="kpi-grid">
+    @if (isAdmin()) {
+      <div class="interactive-card card-indigo" (click)="allerVers('/catalogue')">
+        <span class="metric-label">TOTAL SUJETS</span>
+        <h2 class="metric-value">{{ stats[0].amount }}</h2>
+      </div>
+      <div class="interactive-card card-teal" (click)="allerVers('/annuaire/entreprises')">
+        <span class="metric-label">ENTREPRISES</span>
+        <h2 class="metric-value">{{ stats[1].amount }}</h2>
+      </div>
+      <div class="interactive-card card-purple" (click)="allerVers('/annuaire/laboratoires')">
+        <span class="metric-label">LABORATOIRES</span>
+        <h2 class="metric-value">{{ stats[2].amount }}</h2>
+      </div>
+      <div class="interactive-card card-amber" (click)="allerVers('/admin/validation-sujets')">
+        <span class="metric-label">EN ATTENTE</span>
+        <h2 class="metric-value">{{ stats[3].amount }}</h2>
+      </div>
+    } @else {
+      <div class="interactive-card card-indigo" (click)="allerVers('/mon-stage')">
+        <div class="card-top"><mat-icon>school</mat-icon></div>
+        <div class="card-metric"><span class="metric-label">MON STAGE</span><h2 class="metric-value">Suivi</h2></div>
+      </div>
+      <div class="interactive-card card-teal" (click)="allerVers('/catalogue')">
+        <div class="card-top"><mat-icon>search</mat-icon></div>
+        <div class="card-metric"><span class="metric-label">CATALOGUE</span><h2 class="metric-value">Sujets</h2></div>
+      </div>
+    }
+  </div>
+
+  <!-- ================= SECTION BASSE ================= -->
+  @if (isAdmin()) {
+    <div class="content-grid">
+      <div class="content-panel">
+        <h3 class="panel-title">Répartition par Technologie</h3>
+        <div class="panel-body">
+          @for (tech of techList; track $index) {
+            <div class="tech-row">
+              <div class="tech-header"><span>{{ tech.name }}</span><span class="pct-tag">{{ tech.percentage }}%</span></div>
+              <div class="progress-track"><div class="progress-bar-glow" [style.width.%]="tech.percentage"></div></div>
+            </div>
+          }
+        </div>
+      </div>
+      <div class="content-panel">
+        <h3 class="panel-title">Informations Système</h3>
+        <p class="desc-info">Plateforme centralisée de gestion des PFE.</p>
+        <div class="system-list">
+          <div class="system-row"><span class="sys-item">Validation</span><span class="status-badge status-green">Active</span></div>
+        </div>
+      </div>
+    </div>
+  } @else {
+    <!-- SECTION BASSE ÉTUDIANT -->
+    <div class="content-grid">
+      <div class="content-panel">
+        <h3 class="panel-title">Conseils PFE</h3>
+        <p class="desc-info">N'oubliez pas de faire valider votre sujet par votre tuteur académique avant la date limite.</p>
+        <button mat-button color="primary" (click)="allerVers('/catalogue')">Consulter les guides</button>
+      </div>
+    </div>
+  }
+
+</div> 

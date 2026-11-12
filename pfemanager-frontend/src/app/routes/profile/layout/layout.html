@@ -1,0 +1,36 @@
+<div class="profile-single-container">
+  
+  <!-- En-tête sans doublons -->
+  <div class="profile-header-clean">
+    <div class="user-main-row">
+      <div class="avatar-hero">
+        {{ getInitials(user()?.name) }}
+      </div>
+      <div class="user-hero-info">
+        <div class="name-badge-row">
+          <h1 class="hero-name">{{ user()?.name || 'Administrateur' }}</h1>
+          <span class="role-pill-main">PFE Manager — Actif</span>
+        </div>
+        <p class="hero-email">{{ user()?.email || 'admin@pfemanager.com' }}</p>
+      </div>
+    </div>
+
+    <!-- Onglets de navigation intégrés au lieu d'une 2ème carte -->
+    <div class="profile-tabs-bar">
+      <a class="tab-link" routerLink="/profile/overview" routerLinkActive="active-tab">
+        <mat-icon>badge</mat-icon>
+        <span>Vue d'ensemble</span>
+      </a>
+      <a class="tab-link" routerLink="/profile/settings" routerLinkActive="active-tab">
+        <mat-icon>tune</mat-icon>
+        <span>Modifier mes informations</span>
+      </a>
+    </div>
+  </div>
+
+  <!-- Le contenu (Overview ou Settings) s'affiche en grand en-dessous -->
+  <div class="profile-outlet-body">
+    <router-outlet />
+  </div>
+
+</div>

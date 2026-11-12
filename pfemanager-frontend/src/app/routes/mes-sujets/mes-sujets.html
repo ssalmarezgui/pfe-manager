@@ -1,0 +1,220 @@
+<div class="sujets-wrapper">
+  
+  <!-- ================= EN-TÊTE DE LA PAGE ================= -->
+  <div class="page-header">
+    <div class="title-row">
+      <h1 class="page-title">Mes Sujets de PFE</h1>
+      <span class="count-badge">{{ mesSujets.length }} sujet(s) publié(s)</span>
+    </div>
+    <p class="page-subtitle">Publication, mise à jour et suivi des sujets proposés par votre organisme</p>
+  </div>
+
+  <!-- ================= DISPOSITION 2 COLONNES (GRID) ================= -->
+  <div class="sujets-grid">
+    
+    <!-- COLONNE GAUCHE : Formulaire de Création / Édition -->
+    <div class="panel-box">
+      <div class="panel-header">
+        <div class="panel-title-group">
+          <div class="header-icon-box" [class.editing-icon]="isEditing">
+            <mat-icon>{{ isEditing ? 'edit_note' : 'add_task' }}</mat-icon>
+          </div>
+          <div>
+            <div class="d-flex align-items-center gap-2">
+              <h3 class="panel-title">{{ isEditing ? 'Modifier le Sujet' : 'Publier un Sujet' }}</h3>
+              @if (isEditing) {
+                <span class="editing-pill">Mode Édition</span>
+              }
+            </div>
+            <p class="panel-subtitle">
+              {{ isEditing ? 'Les modifications repasseront en attente de validation' : 'Proposez une offre aux étudiants' }}
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <div class="panel-body">
+        <form (ngSubmit)="enregistrerSujet()" class="sujet-form">
+          
+          <!-- Titre -->
+          <div class="form-group mb-3">
+            <label class="form-label">Titre du sujet</label>
+            <mat-form-field appearance="outline" class="w-full">
+              <input matInput [(ngModel)]="form.titre" name="titre" placeholder="Ex: Développement d'une plateforme d'analytique..." required />
+            </mat-form-field>
+          </div>
+
+          <!-- Technologies & Durée côte à côte -->
+          <div class="form-row mb-3">
+            <div class="form-group flex-1">
+              <label class="form-label">Technologies requises</label>
+              <mat-form-field appearance="outline" class="w-full">
+                <input matInput [(ngModel)]="form.technologies" name="technologies" placeholder="Ex: Spring Boot, Angular, Docker" required />
+              </mat-form-field>
+            </div>
+
+            <div class="form-group duration-col">
+              <label class="form-label">Durée prévue</label>
+              <mat-form-field appearance="outline" class="w-full">
+                <input matInput [(ngModel)]="form.duree" name="duree" placeholder="Ex: 6 mois" required />
+              </mat-form-field>
+            </div>
+          </div>
+
+          <!-- Description -->
+          <div class="form-group mb-4">
+            <label class="form-label">Description complète & Objectifs</label>
+            <mat-form-field appearance="outline" class="w-full">
+              <textarea matInput [(ngModel)]="form.description" name="description" rows="4" placeholder="Détaillez le contexte, les livrables attendus et les missions..." required></textarea>
+            </mat-form-field>
+          </div>
+
+          <!-- Boutons d'Action -->
+          <div class="form-actions">
+            <button class="btn-primary-submit" type="submit" [disabled]="isSubmitting">
+              <mat-icon>{{ isEditing ? 'save' : 'publish' }}</mat-icon>
+              <span>{{ isEditing ? 'Enregistrer les modifications' : 'Publier le sujet' }}</span>
+            </button>
+            
+            @if (isEditing) {
+              <button class="btn-cancel" type="button" (click)="reinitialiserFormulaire()">
+                Annuler
+              </button>
+            }
+          </div>
+
+        </form>
+      </div>
+    </div>
+
+    <!-- COLONNE DROITE : Tableau des Sujets Publiés -->
+    <div class="panel-box">
+      <div class="panel-header">
+        <div class="panel-title-group">
+          <div class="header-icon-box teal-accent">
+            <mat-icon>list_alt</mat-icon>
+          </div>
+          <div>
+            <h3 class="panel-title">Vos Sujets Enregistrés</h3>
+            <p class="panel-subtitle">Gérez vos offres et consultez leur état de validation</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="panel-body p-0">
+        @if (isLoading) {
+          <div class="state-container">
+            <div class="spinner"></div>
+            <p>Chargement de vos publications...</p>
+          </div>
+        } @else if (mesSujets.length === 0) {
+          <div class="state-container">
+            <mat-icon class="state-icon">post_add</mat-icon>
+            <h3>Aucun sujet publié</h3>
+            <p>Utilisez le formulaire à gauche pour soumettre votre premier sujet de PFE.</p>
+          </div>
+        } @else {
+          <div class="table-responsive">
+            <table mat-table [dataSource]="mesSujets" class="custom-table">
+              
+              <!-- Titre -->
+              <ng-container matColumnDef="titre">
+                <th mat-header-cell *matHeaderCellDef>Titre du sujet</th>
+                <td mat-cell *matCellDef="let element">
+                  <div class="subject-info">
+                    <span class="subject-title">{{ element.titre }}</span>
+                    <span class="subject-desc-preview">{{ element.description }}</span>
+                  </div>
+                </td>
+              </ng-container>
+
+              <!-- Technologies -->
+              <ng-container matColumnDef="technologies">
+                <th mat-header-cell *matHeaderCellDef>Technologies</th>
+                <td mat-cell *matCellDef="let element">
+                  <div class="tech-tags-list">
+                    @for (tech of getTechList(element.technologies); track $index) {
+                      <span class="tech-chip">{{ tech }}</span>
+                    }
+                  </div>
+                </td>
+              </ng-container>
+
+              <!-- Durée -->
+              <ng-container matColumnDef="duree">
+                <th mat-header-cell *matHeaderCellDef>Durée</th>
+                <td mat-cell *matCellDef="let element">
+                  <div class="duration-badge">
+                    <mat-icon>schedule</mat-icon>
+                    <span>{{ element.duree || '6 mois' }}</span>
+                  </div>
+                </td>
+              </ng-container>
+
+              <!-- Statut -->
+              <ng-container matColumnDef="statut">
+                <th mat-header-cell *matHeaderCellDef>Statut</th>
+                <td mat-cell *matCellDef="let element">
+                  @if (element.statut === 'VALIDE') {
+                    <span class="status-pill status-valide">
+                      <span class="dot"></span> Validé
+                    </span>
+                  } @else if (element.statut === 'REFUSE') {
+                    <span class="status-pill status-refuse">
+                      <span class="dot"></span> Refusé
+                    </span>
+                  } @else {
+                    <span class="status-pill status-pending">
+                      <span class="dot pulse"></span> En attente
+                    </span>
+                  }
+                </td>
+              </ng-container>
+
+              <!-- Actions (Modifier & Supprimer) -->
+              <ng-container matColumnDef="actions">
+                <th mat-header-cell *matHeaderCellDef class="text-center">Actions</th>
+                <td mat-cell *matCellDef="let element" class="text-center">
+                  <div class="action-buttons-group">
+                    <button class="action-btn edit-btn" (click)="editer(element)" title="Modifier ce sujet">
+                      <mat-icon>edit</mat-icon>
+                    </button>
+                    <button class="action-btn delete-btn" (click)="supprimer(element.id)" title="Supprimer ce sujet">
+                      <mat-icon>delete_outline</mat-icon>
+                    </button>
+                  </div>
+                </td>
+              </ng-container>
+
+              <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+              <tr mat-row *matRowDef="let row; columns: displayedColumns" class="table-row"></tr>
+            </table>
+          </div>
+        }
+      </div>
+    </div>
+
+  </div>
+
+  <!-- ================= MODALE DE CONFIRMATION DE SUPPRESSION ================= -->
+  <ng-template #confirmDialog>
+    <div style="padding: 32px 24px; text-align: center; display: flex; flex-direction: column; align-items: center;">
+      <div style="width: 56px; height: 56px; background: #fef2f2; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin-bottom: 20px;">
+        <mat-icon style="font-size: 28px; width: 28px; height: 28px; color: #ef4444;">delete_outline</mat-icon>
+      </div>
+      <h2 style="margin: 0 0 10px 0; font-size: 19px; font-weight: 800; color: #111827;">Confirmer la suppression</h2>
+      <p style="margin: 0 0 28px 0; font-size: 13.5px; color: #6b7280; line-height: 1.5; max-width: 280px;">
+        Êtes-vous absolument sûr ? Cette action est définitive et ne peut pas être annulée.
+      </p>
+      <div style="display: flex; gap: 12px; width: 100%;">
+        <button mat-button mat-dialog-close style="flex: 1; height: 44px; border-radius: 8px; font-weight: 600; color: #4b5563; background: #f3f4f6;">
+          Annuler
+        </button>
+        <button mat-flat-button [mat-dialog-close]="true" style="flex: 1; height: 44px; border-radius: 8px; font-weight: 600; color: white; background: #ef4444; box-shadow: 0 4px 12px rgba(239,68,68,0.25);">
+          Oui, Supprimer
+        </button>
+      </div>
+    </div>
+  </ng-template>
+
+</div>

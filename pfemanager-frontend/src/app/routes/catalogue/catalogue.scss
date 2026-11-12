@@ -1,0 +1,395 @@
+.catalogue-wrapper {
+  padding: 1.5rem;
+  background-color: transparent;
+  min-height: 100%;
+  box-sizing: border-box;
+}
+
+/* --- EN-TÊTE DE LA PAGE --- */
+.page-header {
+  margin-bottom: 1.5rem;
+
+  .title-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
+
+    .page-title {
+      font-size: 1.4rem;
+      font-weight: 800;
+      color: #111827;
+      margin: 0;
+      letter-spacing: -0.5px;
+    }
+
+    .count-badge {
+      background: #eef2ff;
+      color: #4f46e5;
+      font-size: 12px;
+      font-weight: 700;
+      padding: 4px 12px;
+      border-radius: 20px;
+    }
+  }
+
+  .page-subtitle {
+    font-size: 0.875rem;
+    color: #6b7280;
+    margin: 4px 0 0 0;
+  }
+}
+
+/* --- BARRE DE FILTRE --- */
+.filter-card {
+  background: #ffffff;
+  border-radius: 16px;
+  border: 1px solid #e5e7eb;
+  padding: 1rem 1.25rem 0.25rem;
+  margin-bottom: 1.75rem;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.02);
+
+  .filter-grid {
+    display: flex;
+    gap: 12px;
+    align-items: center;
+    flex-wrap: wrap;
+
+    .filter-field {
+      flex: 1 1 300px;
+
+      mat-form-field {
+        width: 100%;
+        margin-bottom: -0.5rem;
+      }
+
+      .search-suffix-icon {
+        color: #9ca3af;
+      }
+    }
+
+    .filter-actions {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 0.75rem;
+
+      .btn-filter {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        background: #4f46e5;
+        color: white;
+        border: none;
+        border-radius: 8px;
+        height: 48px;
+        padding: 0 20px;
+        font-weight: 600;
+        font-size: 13.5px;
+        cursor: pointer;
+        transition: background 0.2s ease, transform 0.1s ease;
+
+        &:hover {
+          background: #4338ca;
+          transform: translateY(-1px);
+        }
+
+        mat-icon {
+          font-size: 18px;
+          width: 18px;
+          height: 18px;
+        }
+      }
+
+      .btn-reset {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 48px;
+        height: 48px;
+        background: #f9fafb;
+        border: 1px solid #d1d5db;
+        border-radius: 8px;
+        color: #4b5563;
+        cursor: pointer;
+        transition: all 0.2s ease;
+
+        &:hover {
+          background: #f3f4f6;
+          color: #111827;
+        }
+
+        mat-icon {
+          font-size: 20px;
+          width: 20px;
+          height: 20px;
+        }
+      }
+    }
+  }
+}
+
+/* --- GRILLE DES CARTES DE SUJETS (CSS GRID) --- */
+.sujets-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+  gap: 1.5rem;
+}
+
+/* --- CARTE SUJET --- */
+.sujet-card {
+  background: #ffffff;
+  border-radius: 16px;
+  border: 1px solid #e5e7eb;
+  padding: 1.25rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.02);
+  transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+
+  &:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 12px 24px -6px rgba(79, 70, 229, 0.08);
+    border-color: #c7d2fe;
+  }
+
+  /* Origine (Entreprise / Labo) */
+  .card-origin-bar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 12px;
+    gap: 8px;
+
+    .origin-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 12px;
+      font-weight: 700;
+      padding: 4px 10px;
+      border-radius: 20px;
+
+      mat-icon {
+        font-size: 16px;
+        width: 16px;
+        height: 16px;
+      }
+
+      &.origin-entreprise {
+        background: #ecfdf5;
+        color: #047857;
+      }
+
+      &.origin-labo {
+        background: #f5f3ff;
+        color: #6d28d9;
+      }
+
+      &.origin-etudiant {
+        background: #eff6ff;
+        color: #1d4ed8;
+      }
+    }
+
+    .sector-tag {
+      font-size: 11px;
+      color: #6b7280;
+      background: #f3f4f6;
+      padding: 2px 8px;
+      border-radius: 6px;
+      max-width: 130px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+  }
+
+  /* Titre et description */
+  .card-main-content {
+    margin-bottom: 14px;
+    flex: 1;
+
+    .sujet-title {
+      font-size: 16px;
+      font-weight: 700;
+      color: #111827;
+      margin: 0 0 8px 0;
+      line-height: 1.4;
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+
+    .sujet-desc {
+      font-size: 13px;
+      color: #4b5563;
+      line-height: 1.5;
+      margin: 0;
+      display: -webkit-box;
+      -webkit-line-clamp: 3;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+  }
+
+  /* Métadonnées & Technologies */
+  .card-meta {
+    margin-bottom: 14px;
+    padding-top: 10px;
+    border-top: 1px dashed #f3f4f6;
+
+    .duration-row {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 12px;
+      color: #6b7280;
+      margin-bottom: 10px;
+
+      mat-icon {
+        font-size: 16px;
+        width: 16px;
+        height: 16px;
+        color: #9ca3af;
+      }
+
+      strong {
+        color: #1f2937;
+      }
+    }
+
+    .tech-tags-container {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+
+      .tech-chip {
+        background: #f8fafc;
+        border: 1px solid #e2e8f0;
+        color: #334155;
+        font-size: 11.5px;
+        font-weight: 600;
+        padding: 3px 8px;
+        border-radius: 6px;
+      }
+    }
+  }
+
+  /* Footer & Action Postuler */
+  .card-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-top: 12px;
+    border-top: 1px solid #f3f4f6;
+
+    .status-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 11.5px;
+      font-weight: 700;
+      padding: 3px 10px;
+      border-radius: 20px;
+
+      .dot {
+        width: 6px;
+        height: 6px;
+        border-radius: 50%;
+      }
+
+      &.status-valide {
+        background: #ecfdf5;
+        color: #065f46;
+        .dot {
+          background: #10b981;
+        }
+      }
+    }
+
+    .btn-apply {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: #4f46e5;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      padding: 7px 14px;
+      font-size: 12.5px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.2s ease, transform 0.1s ease;
+
+      &:hover {
+        background: #4338ca;
+        transform: translateY(-1px);
+      }
+
+      mat-icon {
+        font-size: 16px;
+        width: 16px;
+        height: 16px;
+      }
+    }
+  }
+}
+
+/* --- ÉTATS CHARGEMENT & VIDE --- */
+.state-card {
+  background: #ffffff;
+  border-radius: 16px;
+  border: 1px solid #e5e7eb;
+  padding: 40px;
+  text-align: center;
+  color: #6b7280;
+
+  &.empty-state {
+    .state-icon {
+      font-size: 48px;
+      width: 48px;
+      height: 48px;
+      color: #9ca3af;
+      margin-bottom: 12px;
+    }
+
+    h3 {
+      font-size: 16px;
+      font-weight: 700;
+      color: #111827;
+      margin: 0 0 6px 0;
+    }
+
+    p {
+      font-size: 13px;
+      margin: 0 0 16px 0;
+    }
+
+    .btn-reset-large {
+      background: #4f46e5;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      padding: 8px 18px;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+    }
+  }
+}
+
+.spinner {
+  width: 32px;
+  height: 32px;
+  border: 3px solid #e5e7eb;
+  border-top-color: #4f46e5;
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+  margin: 0 auto 12px auto;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}

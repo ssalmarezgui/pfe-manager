@@ -1,0 +1,52 @@
+{
+  "menu": [
+    {
+      "route": "dashboard",
+      "name": "dashboard",
+      "type": "link",
+      "icon": "dashboard"
+    },
+    {
+      "route": "catalogue",
+      "name": "catalogue",
+      "type": "link",
+      "icon": "library_books"
+    },
+    {
+      "route": "annuaire/entreprises",
+      "name": "entreprises",
+      "type": "link",
+      "icon": "business"
+    },
+    {
+      "route": "annuaire/laboratoires",
+      "name": "laboratoires",
+      "type": "link",
+      "icon": "science"
+    },
+    {
+      "route": "mon-stage",
+      "name": "mon_stage",
+      "type": "link",
+      "icon": "school"
+    },
+    {
+      "route": "mes-sujets",
+      "name": "mes_sujets",
+      "type": "link",
+      "icon": "work"
+    },
+    {
+      "route": "admin/validation-sujets",
+      "name": "validation_sujets",
+      "type": "link",
+      "icon": "check_circle"
+    },
+    {
+      "route": "admin/utilisateurs",
+      "name": "utilisateurs",
+      "type": "link",
+      "icon": "people"
+    }
+  ]
+}

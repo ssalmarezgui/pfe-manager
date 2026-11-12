@@ -1,0 +1,64 @@
+{
+  "menu": [
+    {
+      "route": "dashboard",
+      "name": "dashboard",
+      "type": "link",
+      "icon": "dashboard"
+    },
+    {
+      "route": "catalogue",
+      "name": "catalogue",
+      "type": "link",
+      "icon": "library_books"
+    },
+    {
+      "route": "entreprises",
+      "name": "entreprises",
+      "type": "link",
+      "icon": "business"
+    },
+    {
+      "route": "laboratoires",
+      "name": "laboratoires",
+      "type": "link",
+      "icon": "biotech"
+    },
+    {
+      "route": "mon-stage",
+      "name": "mon_stage",
+      "type": "link",
+      "icon": "school",
+      "permissions": {
+        "only": ["ROLE_ETUDIANT", "etudiant", "ETUDIANT"]
+      }
+    },
+    {
+      "route": "mes-sujets",
+      "name": "mes_sujets",
+      "type": "link",
+      "icon": "work",
+      "permissions": {
+        "only": ["ROLE_ENTREPRISE", "ROLE_ENSEIGNANT", "entreprise", "enseignant"]
+      }
+    },
+    {
+      "route": "validation-sujets",
+      "name": "validation_sujets",
+      "type": "link",
+      "icon": "verified",
+      "permissions": {
+        "only": ["ROLE_ADMIN", "admin", "ADMIN"]
+      }
+    },
+    {
+      "route": "utilisateurs",
+      "name": "utilisateurs",
+      "type": "link",
+      "icon": "group",
+      "permissions": {
+        "only": ["ROLE_ADMIN", "admin", "ADMIN"]
+      }
+    }
+  ]
+}

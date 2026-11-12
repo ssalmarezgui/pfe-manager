@@ -1,0 +1,20 @@
+<mat-toolbar class="main-toolbar">
+  <!-- Bouton des 3 lignes (☰) stylé en Bleu Indigo -->
+  <button mat-icon-button (click)="toggleSidenav.emit()" class="btn-hamburger" title="Ouvrir / Fermer le menu">
+    <mat-icon>menu</mat-icon>
+  </button>
+
+  @if (showBranding()) {
+    <app-branding />
+  }
+
+  <span class="flex-fill"></span>
+
+  <!-- Plein écran -->
+  <button mat-icon-button class="hide-small" (click)="toggleFullscreen()" title="Plein écran">
+    <mat-icon>fullscreen</mat-icon>
+  </button>
+
+  <!-- Menu Utilisateur -->
+  <app-user />
+</mat-toolbar>

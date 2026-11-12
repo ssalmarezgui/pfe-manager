@@ -1,0 +1,119 @@
+<div class="entreprises-wrapper">
+  
+  <!-- ================= EN-TÊTE DE LA PAGE ================= -->
+  <div class="page-header">
+    <div>
+      <div class="title-row">
+        <h1 class="page-title">Annuaire des Entreprises Partenaires</h1>
+        <span class="count-badge">{{ entreprises.length }} partenaires actifs</span>
+      </div>
+      <p class="page-subtitle">Liste des sociétés et partenaires industriels collaborant avec l'établissement</p>
+    </div>
+  </div>
+
+  <!-- ================= BARRE D'OUTILS ET RECHERCHE ================= -->
+  <div class="toolbar-card">
+    <div class="search-box">
+      <mat-icon class="search-icon">search</mat-icon>
+      <input 
+        type="text" 
+        [(ngModel)]="searchTerm" 
+        placeholder="Rechercher par nom, secteur ou ville..." 
+        class="search-input"
+      />
+      @if (searchTerm) {
+        <button class="clear-btn" (click)="searchTerm = ''">
+          <mat-icon>close</mat-icon>
+        </button>
+      }
+    </div>
+  </div>
+
+  <!-- ================= CONTENU DU TABLEAU ================= -->
+  <div class="table-card">
+    @if (isLoading) {
+      <div class="state-container">
+        <div class="spinner"></div>
+        <p>Chargement des entreprises partenaires...</p>
+      </div>
+    } @else if (filteredEntreprises.length === 0) {
+      <div class="state-container">
+        <mat-icon class="state-icon">domain_disabled</mat-icon>
+        <h3>Aucune entreprise trouvée</h3>
+        <p>Aucun résultat ne correspond à votre recherche "{{ searchTerm }}".</p>
+      </div>
+    } @else {
+      <div class="table-responsive">
+        <table mat-table [dataSource]="filteredEntreprises" class="custom-table">
+          
+          <!-- Colonne 1 : Entreprise avec Avatar -->
+          <ng-container matColumnDef="nom">
+            <th mat-header-cell *matHeaderCellDef>Entreprise</th>
+            <td mat-cell *matCellDef="let element">
+              <div class="company-cell">
+                <div class="company-avatar">{{ getInitials(element.nom) }}</div>
+                <div class="company-info">
+                  <span class="company-name">{{ element.nom }}</span>
+                  <span class="company-id">Partenaire officiel</span>
+                </div>
+              </div>
+            </td>
+          </ng-container>
+
+          <!-- Colonne 2 : Secteur d'activité -->
+          <ng-container matColumnDef="secteur">
+            <th mat-header-cell *matHeaderCellDef>Secteur d'activité</th>
+            <td mat-cell *matCellDef="let element">
+              <span class="sector-pill">{{ element.secteur || 'Non renseigné' }}</span>
+            </td>
+          </ng-container>
+
+          <!-- Colonne 3 : Email de contact -->
+          <ng-container matColumnDef="email">
+            <th mat-header-cell *matHeaderCellDef>Email de contact</th>
+            <td mat-cell *matCellDef="let element">
+              @if (element.email) {
+                <a [href]="'mailto:' + element.email" class="contact-link email-link">
+                  <mat-icon>mail_outline</mat-icon>
+                  <span>{{ element.email }}</span>
+                </a>
+              } @else {
+                <span class="text-muted">—</span>
+              }
+            </td>
+          </ng-container>
+
+          <!-- Colonne 4 : Téléphone -->
+          <ng-container matColumnDef="tel">
+            <th mat-header-cell *matHeaderCellDef>Téléphone</th>
+            <td mat-cell *matCellDef="let element">
+              @if (element.tel) {
+                <a [href]="'tel:' + element.tel" class="contact-link phone-link">
+                  <mat-icon>phone</mat-icon>
+                  <span>{{ element.tel }}</span>
+                </a>
+              } @else {
+                <span class="text-muted">—</span>
+              }
+            </td>
+          </ng-container>
+
+          <!-- Colonne 5 : Adresse -->
+          <ng-container matColumnDef="adresse">
+            <th mat-header-cell *matHeaderCellDef>Localisation</th>
+            <td mat-cell *matCellDef="let element">
+              <div class="location-cell">
+                <mat-icon>location_on</mat-icon>
+                <span>{{ element.adresse || 'Tunisie' }}</span>
+              </div>
+            </td>
+          </ng-container>
+
+          <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+          <tr mat-row *matRowDef="let row; columns: displayedColumns" class="table-row"></tr>
+        </table>
+      </div>
+    }
+  </div>
+
+</div>

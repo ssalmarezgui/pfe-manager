@@ -1,0 +1,60 @@
+.user-panel-card {
+  background: #ffffff;
+  border: 1px solid #e5e7eb;
+  border-radius: 14px;
+  padding: 12px;
+  margin: 10px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.03);
+
+  .user-main-info {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    cursor: pointer;
+    padding-bottom: 12px;
+    border-bottom: 1px solid #f3f4f6;
+    margin-bottom: 10px;
+
+    .avatar-bubble {
+      width: 42px;
+      height: 42px;
+      border-radius: 12px;
+      background: linear-gradient(135deg, #4f46e5 0%, #3b82f6 100%);
+      color: white;
+      font-weight: 800;
+      font-size: 14px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+
+    .user-text {
+      overflow: hidden;
+      .user-name { font-weight: 700; color: #111827; margin: 0; font-size: 14px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+      .user-email { font-size: 11px; color: #6b7280; display: block; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    }
+  }
+
+  .user-actions-row {
+    display: flex;
+    gap: 4px;
+
+    .btn-action {
+      flex: 1;
+      font-size: 11px !important;
+      font-weight: 600;
+      padding: 0 8px !important;
+      min-height: 32px !important;
+      line-height: 32px !important;
+      background: #f9fafb;
+      
+      mat-icon { font-size: 16px; margin-right: 4px; }
+
+      &.logout {
+        color: #dc2626;
+        &:hover { background: #fef2f2; }
+      }
+    }
+  }
+}

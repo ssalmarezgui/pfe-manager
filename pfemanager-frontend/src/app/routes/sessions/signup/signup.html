@@ -1,0 +1,133 @@
+<div class="signup-page-wrapper" style="width: 100vw; min-height: 100vh; display: flex; align-items: center; justify-content: center; background: #f3f4f6; position: fixed; top: 0; left: 0; z-index: 9999; overflow-y: auto; padding: 20px;">
+  
+  <!-- Carte Asymétrique (Similaire au Login mais plus large) -->
+  <div class="signup-card-box" style="display: flex; width: 950px; max-width: 100%; background: #ffffff; border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); overflow: hidden;">
+    
+    <!-- Panneau de Gauche : Branding / Visuel Pro -->
+    <div style="flex: 1; background: linear-gradient(135deg, #4f46e5 0%, #3b82f6 100%); color: white; padding: 40px; display: flex; flex-direction: column; justify-content: space-between;">
+      <div>
+        <span style="background: rgba(255,255,255,0.2); padding: 6px 14px; border-radius: 20px; font-size: 12px; font-weight: bold;">PFE Manager</span>
+      </div>
+      <div class="my-auto py-5">
+        <h1 style="font-size: 26px; font-weight: bold; margin-bottom: 12px; color: white;">Rejoignez la Plateforme</h1>
+        <p style="font-size: 14px; opacity: 0.75; margin: 0; line-height: 1.5;">Créez votre compte en tant qu'Étudiant, Entreprise ou Enseignant pour collaborer facilement.</p>
+      </div>
+      <div style="font-size: 12px; opacity: 0.5;">
+        ENSI - École Nationale des Sciences de l'Informatique
+      </div>
+    </div>
+
+    <!-- Panneau de Droite : Formulaire d'Inscription -->
+    <div style="flex: 1.3; padding: 40px; display: flex; flex-direction: column; justify-content: center; max-height: 90vh; overflow-y: auto;">
+      
+      <div style="margin-bottom: 20px;">
+        <h2 style="font-size: 22px; font-weight: bold; color: #111827; margin-bottom: 4px;">Créer un compte</h2>
+        <p style="font-size: 13px; color: #6b7280; margin: 0;">Remplissez les informations ci-dessous.</p>
+      </div>
+
+      @if (errorMessage) {
+        <div style="background: #fee2e2; color: #991b1b; padding: 10px; border-radius: 8px; font-size: 13px; margin-bottom: 16px;">
+          {{ errorMessage }}
+        </div>
+      }
+
+      <form [formGroup]="signupForm" (ngSubmit)="register()" style="width: 100%;">
+        
+        <!-- Nom & Prénom -->
+        <div style="display: flex; gap: 12px; margin-bottom: 12px;">
+          <div style="flex: 1;">
+            <label style="display: block; font-size: 12px; font-weight: 600; color: #374151; margin-bottom: 4px;">Nom</label>
+            <mat-form-field appearance="outline" style="width: 100%;">
+              <input matInput formControlName="nom" placeholder="Nom" required />
+            </mat-form-field>
+          </div>
+          <div style="flex: 1;">
+            <label style="display: block; font-size: 12px; font-weight: 600; color: #374151; margin-bottom: 4px;">Prénom</label>
+            <mat-form-field appearance="outline" style="width: 100%;">
+              <input matInput formControlName="prenom" placeholder="Prénom" required />
+            </mat-form-field>
+          </div>
+        </div>
+
+        <!-- Email -->
+        <div style="margin-bottom: 12px;">
+          <label style="display: block; font-size: 12px; font-weight: 600; color: #374151; margin-bottom: 4px;">Adresse Email</label>
+          <mat-form-field appearance="outline" style="width: 100%;">
+            <input matInput type="email" formControlName="email" placeholder="nom@exemple.com" required />
+          </mat-form-field>
+        </div>
+
+        <!-- Téléphone & Mot de passe -->
+        <div style="display: flex; gap: 12px; margin-bottom: 12px;">
+          <div style="flex: 1;">
+            <label style="display: block; font-size: 12px; font-weight: 600; color: #374151; margin-bottom: 4px;">Téléphone</label>
+            <mat-form-field appearance="outline" style="width: 100%;">
+              <input matInput formControlName="tel" placeholder="20123456" required />
+            </mat-form-field>
+          </div>
+          <div style="flex: 1;">
+            <label style="display: block; font-size: 12px; font-weight: 600; color: #374151; margin-bottom: 4px;">Mot de passe</label>
+            <mat-form-field appearance="outline" style="width: 100%;">
+              <input matInput type="password" formControlName="password" placeholder="••••••••" required />
+            </mat-form-field>
+          </div>
+        </div>
+
+        <!-- Type de profil -->
+        <div style="margin-bottom: 12px;">
+          <label style="display: block; font-size: 12px; font-weight: 600; color: #374151; margin-bottom: 4px;">Type de profil</label>
+          <select formControlName="role" style="width: 100%; height: 44px; padding: 0 12px; border: 1px solid #d1d5db; border-radius: 8px; background: white; font-size: 13px; outline: none; cursor: pointer;">
+            <option value="etudiant">Étudiant (Collaborateur)</option>
+            <option value="entreprise">Représentant d'Entreprise</option>
+            <option value="enseignant">Enseignant / Chercheur</option>
+          </select>
+        </div>
+
+        <!-- Sélection Entreprise (Conditionnel) -->
+        @if (signupForm.get('role')?.value === 'entreprise') {
+          <div style="margin-bottom: 12px; background: #f9fafb; padding: 12px; border-radius: 8px; border: 1px solid #e5e7eb;">
+            <label style="display: block; font-size: 12px; font-weight: 600; color: #374151; margin-bottom: 4px;">Rattachement Entreprise</label>
+            <select formControlName="idEntreprise" style="width: 100%; height: 40px; padding: 0 12px; border: 1px solid #d1d5db; border-radius: 8px; background: white; font-size: 13px; outline: none; cursor: pointer;">
+              <option [ngValue]="null" disabled selected>-- Choisissez votre entreprise --</option>
+              @for (ent of entreprises; track ent.id) {
+                <option [value]="ent.id">{{ ent.nom }} ({{ ent.secteur }})</option>
+              }
+            </select>
+          </div>
+        }
+
+        <!-- Sélection Labo (Conditionnel) -->
+        @if (signupForm.get('role')?.value === 'enseignant') {
+          <div style="margin-bottom: 12px; background: #f9fafb; padding: 12px; border-radius: 8px; border: 1px solid #e5e7eb;">
+            <label style="display: block; font-size: 12px; font-weight: 600; color: #374151; margin-bottom: 4px;">Rattachement Laboratoire</label>
+            <select formControlName="idLabo" style="width: 100%; height: 40px; padding: 0 12px; border: 1px solid #d1d5db; border-radius: 8px; background: white; font-size: 13px; outline: none; cursor: pointer;">
+              <option [ngValue]="null" disabled selected>-- Choisissez votre laboratoire --</option>
+              @for (lab of labos; track lab.id) {
+                <option [value]="lab.id">{{ lab.nom }} ({{ lab.etablissement }})</option>
+              }
+            </select>
+          </div>
+        }
+
+        <!-- Bouton Soumission -->
+        <button
+          type="submit"
+          [disabled]="signupForm.invalid || isSubmitting"
+          style="width: 100%; height: 46px; background: #4f46e5; color: white; border: none; border-radius: 8px; font-size: 14px; font-weight: bold; cursor: pointer; margin-top: 10px; transition: background 0.2s;"
+          onmouseover="this.style.background='#4338ca'"
+          onmouseout="this.style.background='#4f46e5'"
+        >
+          Créer mon compte
+        </button>
+
+        <!-- Lien Connexion -->
+        <div style="text-align: center; margin-top: 16px; font-size: 13px; color: #6b7280;">
+          Déjà un compte ? 
+          <a routerLink="/auth/login" style="color: #4f46e5; font-weight: bold; text-decoration: none;">Se connecter</a>
+        </div>
+
+      </form>
+    </div>
+
+  </div>
+</div>

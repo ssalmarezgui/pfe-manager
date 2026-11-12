@@ -1,0 +1,423 @@
+/* You can add global styles to this file, and also import other style files */
+@use 'styles/reboot';
+@use 'styles/themes';
+@use 'styles/colors';
+@use 'styles/grid';
+@use 'styles/helpers';
+@use 'styles/plugins';
+@use 'styles/custom';
+
+/* --- CONTENEUR GLOBAL --- */
+.dashboard-container {
+  padding: 1.5rem;
+  background-color: transparent !important;
+  min-height: 100%;
+}
+
+/* --- CARTES KPI STATISTIQUES --- */
+.stat-card {
+  background: #ffffff;
+  border-radius: 16px;
+  padding: 20px 24px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.04);
+  border: 1px solid #f0f2f5;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 25px rgba(79, 70, 229, 0.08);
+  }
+
+  .stat-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 12px;
+
+    .stat-title {
+      font-size: 13px;
+      font-weight: 600;
+      color: #6b7280;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .stat-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 11px;
+      font-weight: 600;
+      color: #4f46e5;
+      background: #eef2ff;
+      padding: 4px 10px;
+      border-radius: 20px;
+
+      .pulse-dot {
+        width: 6px;
+        height: 6px;
+        background: #4f46e5;
+        border-radius: 50%;
+      }
+    }
+  }
+
+  .stat-value {
+    font-size: 32px;
+    font-weight: 800;
+    color: #111827;
+    margin: 0 0 12px 0;
+    letter-spacing: -0.5px;
+  }
+
+  .stat-footer {
+    .progress-bar-track {
+      height: 6px;
+      background: #e5e7eb;
+      border-radius: 4px;
+      overflow: hidden;
+      margin-bottom: 8px;
+
+      .progress-bar-fill {
+        height: 100%;
+        background: linear-gradient(90deg, #4f46e5 0%, #3b82f6 100%);
+        border-radius: 4px;
+        transition: width 0.6s ease;
+      }
+    }
+
+    .stat-meta {
+      display: flex;
+      justify-content: space-between;
+      font-size: 11px;
+      color: #9ca3af;
+    }
+  }
+}
+
+/* --- CARTES DE CONTENU --- */
+.content-card {
+  background: #ffffff;
+  border-radius: 16px;
+  border: 1px solid #f0f2f5;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.04);
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+
+  .content-card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 20px;
+    padding-bottom: 16px;
+    border-bottom: 1px solid #f3f4f6;
+
+    .card-heading {
+      font-size: 17px;
+      font-weight: 700;
+      color: #111827;
+      margin: 0 0 4px 0;
+    }
+
+    .card-subheading {
+      font-size: 13px;
+      color: #6b7280;
+      margin: 0;
+    }
+
+    .tag-pill {
+      background: #f3f4f6;
+      color: #4b5563;
+      font-size: 11px;
+      font-weight: 600;
+      padding: 4px 12px;
+      border-radius: 20px;
+    }
+  }
+
+  .content-card-body {
+    flex: 1;
+  }
+}
+
+/* --- LISTE DES TECHNOLOGIES --- */
+.tech-list {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+
+  .tech-item {
+    .tech-info {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 6px;
+
+      .tech-name {
+        font-size: 13.5px;
+        font-weight: 600;
+        color: #1f2937;
+      }
+
+      .tech-stats {
+        font-size: 12px;
+        color: #6b7280;
+
+        .tech-divider {
+          margin: 0 4px;
+          color: #d1d5db;
+        }
+
+        .tech-pct {
+          font-weight: 700;
+          color: #4f46e5;
+        }
+      }
+    }
+
+    .tech-progress-track {
+      height: 9px;
+      background: #f3f4f6;
+      border-radius: 6px;
+      overflow: hidden;
+
+      .tech-progress-fill {
+        height: 100%;
+        background: linear-gradient(90deg, #4f46e5 0%, #3b82f6 100%);
+        border-radius: 6px;
+        transition: width 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+      }
+    }
+  }
+}
+
+/* --- ÉTAT VIDE --- */
+.empty-state {
+  text-align: center;
+  padding: 40px 16px;
+
+  .empty-icon {
+    font-size: 36px;
+    margin-bottom: 8px;
+    opacity: 0.6;
+  }
+
+  .empty-text {
+    font-size: 13px;
+    color: #9ca3af;
+    margin: 0;
+  }
+}
+
+/* --- INFORMATIONS SYSTÈME & STATUS PILLS --- */
+.desc-text {
+  font-size: 13px;
+  color: #6b7280;
+  line-height: 1.5;
+  margin-bottom: 20px;
+}
+
+.info-list {
+  display: flex;
+  flex-direction: column;
+
+  .info-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px 0;
+    border-bottom: 1px solid #f3f4f6;
+
+    &:last-child {
+      border-bottom: none;
+      padding-bottom: 0;
+    }
+
+    .info-label {
+      font-size: 13px;
+      color: #4b5563;
+      font-weight: 500;
+    }
+
+    .session-badge {
+      font-size: 12px;
+      font-weight: 700;
+      color: #111827;
+      background: #f3f4f6;
+      padding: 4px 10px;
+      border-radius: 6px;
+    }
+
+    .status-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 12px;
+      font-weight: 600;
+      padding: 4px 10px;
+      border-radius: 20px;
+
+      .status-indicator {
+        width: 7px;
+        height: 7px;
+        border-radius: 50%;
+      }
+
+      &.status-active {
+        background: #ecfdf5;
+        color: #065f46;
+        .status-indicator { background: #10b981; }
+      }
+
+      &.status-connected {
+        background: #eff6ff;
+        color: #1e40af;
+        .status-indicator { background: #3b82f6; }
+      }
+    }
+  }
+}
+
+/* ==========================================================================
+   SIDEBAR : MODE 100% OUVERT OU 100% FERMÉ (PLUS JAMAIS DE MINI-BANDE COUPEE)
+   ========================================================================== */
+
+// 1. Quand le menu est ouvert, il fait TOUJOURS sa vraie largeur complète (240px)
+mat-sidenav.matero-sidebar,
+.mat-drawer.matero-sidebar {
+  width: 240px !important;
+  min-width: 240px !important;
+  max-width: 240px !important;
+  transition: transform 0.25s ease-in-out !important;
+}
+
+// 2. Suppression définitive du mode 60px écrasé
+.matero-sidebar-collapsed {
+  width: 240px !important;
+}
+
+// 3. Bouton des 3 lignes (☰) en Bleu Indigo moderne
+.btn-hamburger {
+  background-color: #eef2ff !important; // Fond pastel indigo très doux
+  color: #4f46e5 !important;            // Couleur bleu/indigo officielle
+  border-radius: 10px !important;
+  margin-right: 12px !important;
+  width: 40px !important;
+  height: 40px !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  transition: all 0.2s ease !important;
+
+  mat-icon {
+    color: #4f46e5 !important;          // Les 3 traits en BLEU
+    font-size: 22px !important;
+    width: 22px !important;
+    height: 22px !important;
+  }
+
+  &:hover {
+    background-color: #4f46e5 !important;
+    transform: scale(1.05);
+
+    mat-icon {
+      color: #ffffff !important;        // Les 3 traits deviennent blancs au survol
+    }
+  }
+}
+
+
+/* ÉRADICATION TOTALE DU SCROLLBAR SUR TOUT LE PROJET */
+*, 
+*::before, 
+*::after,
+.mat-drawer-inner-container,
+mat-sidenav {
+  scrollbar-width: none !important;
+  -ms-overflow-style: none !important;
+
+  &::-webkit-scrollbar {
+    display: none !important;
+    width: 0 !important;
+    height: 0 !important;
+  }
+}
+
+.mat-drawer-inner-container {
+  overflow: hidden !important;
+}
+
+/* ==========================================================================
+   CORRECTION MENU LATÉRAL : VERROUILLAGE TOTAL DES BULLES
+   ========================================================================== */
+
+// 1. Force TOUT le menu (liens ET conteneurs li) à être transparent par défaut
+.matero-sidemenu {
+  .matero-sidemenu-item,
+  .matero-sidemenu-link {
+    background-color: transparent !important;
+    background: transparent !important;
+    box-shadow: none !important;
+    outline: none !important;
+
+    // Élimine le focus-within et les pseudo-éléments restés coincés
+    &:focus,
+    &:focus-within {
+      background-color: transparent !important;
+    }
+  }
+
+  // 2. SEUL le lien que vous survolez avec la souris prend le gris clair
+  .matero-sidemenu-link:hover {
+    background-color: #f3f4f6 !important;
+    border-radius: 12px !important;
+    color: #111827 !important;
+  }
+
+  // 3. SEULE la page active (ex: Entreprises) prend la bulle bleue Indigo
+  .matero-sidemenu-item.matero-sidemenu-active > .matero-sidemenu-link,
+  .matero-sidemenu-link.active,
+  .matero-sidemenu-item.active > .matero-sidemenu-link {
+    background-color: #eef2ff !important; // Fond pastel indigo
+    color: #4f46e5 !important;            // Texte indigo vif
+    font-weight: 700 !important;
+    border-radius: 12px !important;
+
+    mat-icon {
+      color: #4f46e5 !important;          // Icône indigo
+    }
+  }
+}
+
+
+/* SUPPRESSION DU FOCUS PERSISTANT DE LA SOURIS (ANGULAR MATERIAL) */
+.mat-mdc-list-item,
+.matero-sidemenu-link {
+  // Supprime la couche grise qui reste collée après le clic
+  &.cdk-focused,
+  &.cdk-mouse-focused,
+  &.cdk-program-focused,
+  &:focus {
+    background-color: transparent !important;
+    background: transparent !important;
+
+    .mat-mdc-list-item-state-layer {
+      opacity: 0 !important;
+    }
+  }
+
+  // Seul le survol actif de la souris affiche un gris temporaire
+  &:hover .mat-mdc-list-item-state-layer {
+    opacity: 0.04 !important;
+  }
+}
+/* --- MODALES DE CONFIRMATION MODERNES --- */
+::ng-deep .modern-dialog .mdc-dialog__surface {
+  border-radius: 24px !important;
+  padding: 0 !important;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25) !important;
+}
