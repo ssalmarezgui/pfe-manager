@@ -261,12 +261,11 @@ export class MonStage implements OnInit {
               this.cdr.detectChanges();
             },
             error: () => {
-              // Sauvegarde de secours locale
-              doc.fichier = payload.nom;
-              doc.dateDepot = payload.date;
-              doc.dataUrl = payload.data;
-              this.snackBar.open(`✅ "${doc.nom}" téléversé avec succès !`, 'Fermer', {
-                duration: 3000,
+              this.snackBar.open(`Erreur lors de l'enregistrement de "${doc.nom}" sur le serveur.`, 'Fermer', {
+                duration: 4000,
+                horizontalPosition: 'end',
+                verticalPosition: 'top',
+                panelClass: ['error-snackbar'],
               });
               this.cdr.detectChanges();
             },

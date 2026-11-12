@@ -83,6 +83,10 @@ public class SujetPFEService {
         return sujetRepository.save(sujet);
     }
 
+    public SujetPFE save(SujetPFE sujet) {
+        return sujetRepository.save(sujet);
+    }
+
     public SujetPFE update(Long id, SujetPFERequest request) {
         return sujetRepository.findById(id).map(sujet -> {
             sujet.setTitre(request.getTitre());

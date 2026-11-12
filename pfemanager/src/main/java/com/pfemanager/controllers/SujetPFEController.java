@@ -119,9 +119,6 @@ public class SujetPFEController {
             sujet.setRapportData(data);
         }
 
-        // Sauvegarde directement dans MySQL
-        return ResponseEntity.ok(sujetService.create(new com.pfemanager.dto.SujetPFERequest() {{
-            // Met à jour l'entité
-        }}));
+        return ResponseEntity.ok(sujetService.save(sujet));
     }
 }
