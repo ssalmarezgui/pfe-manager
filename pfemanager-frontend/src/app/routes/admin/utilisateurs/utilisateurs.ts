@@ -23,7 +23,7 @@ import { MatDialog, MatDialogModule } from '@angular/material/dialog';
   ],
   templateUrl: './utilisateurs.html',
   styleUrl: './utilisateurs.scss',
-  encapsulation: ViewEncapsulation.None, // 👈 FORCE LE STYLE DES TOASTS !
+  encapsulation: ViewEncapsulation.None, // FORCE LE STYLE DES TOASTS !
 })
 export class Utilisateurs implements OnInit {
   private readonly http = inject(HttpClient);
@@ -133,7 +133,7 @@ export class Utilisateurs implements OnInit {
 
     dialogRef.afterClosed().subscribe((result) => {
       if (result) {
-        this.http.delete(` /api/users/${id}`, this.getHeaders()).subscribe({
+        this.http.delete(`/api/users/${id}`, this.getHeaders()).subscribe({
           next: () => {
             this.snackBar.open('Utilisateur supprimé avec succès.', 'Fermer', { 
               duration: 3000, 
@@ -141,7 +141,7 @@ export class Utilisateurs implements OnInit {
               verticalPosition: 'top', 
               panelClass: ['success-snackbar'] 
             });
-            // 👈 Recharge immédiatement les données après suppression
+            // Recharge immédiatement les données après suppression
             this.chargerUtilisateurs();
           },
           error: () => {
