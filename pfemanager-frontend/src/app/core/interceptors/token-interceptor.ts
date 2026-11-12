@@ -17,7 +17,8 @@ export function tokenInterceptor(req: HttpRequest<unknown>, next: HttpHandlerFn)
     return new RegExp(`^${baseUrl.replace(/\/$/, '')}`, 'i').test(url);
   };
 
-  const shouldAppendToken = (url: string) => !hasHttpScheme(url) || includeBaseUrl(url);
+  const shouldAppendToken = (url: string) =>
+    (!hasHttpScheme(url) || includeBaseUrl(url)) && !url.includes('/api/auth/');
 
   const handler = () => {
     if (req.url.includes('/auth/logout')) {
@@ -29,16 +30,25 @@ export function tokenInterceptor(req: HttpRequest<unknown>, next: HttpHandlerFn)
     }
   };
 
-  if (tokenService.valid() && shouldAppendToken(req.url)) {
+  // Récupère le token depuis sessionStorage, localStorage ou TokenService
+  const rawToken =
+    sessionStorage.getItem('auth-token') ||
+    localStorage.getItem('auth-token') ||
+    tokenService.getBearerToken().replace(/^Bearer\s+/i, '');
+
+  if (rawToken && shouldAppendToken(req.url)) {
     return next(
       req.clone({
-        headers: req.headers.append('Authorization', tokenService.getBearerToken()),
-        withCredentials: true,
+        // setHeaders remplace Authorization s'il existe déjà (évite les doublons)
+        setHeaders: {
+          Authorization: `Bearer ${rawToken}`,
+        },
       })
     ).pipe(
       catchError((error: HttpErrorResponse) => {
         if (error.status === 401) {
           tokenService.clear();
+          sessionStorage.removeItem('auth-token');
         }
         return throwError(() => error);
       }),
