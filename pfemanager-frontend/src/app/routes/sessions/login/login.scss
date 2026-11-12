@@ -1,0 +1,16 @@
+::ng-deep .login-card-box {
+  .mdc-text-field__input,
+  input.mat-mdc-input-element {
+    color: #111827 !important;
+    caret-color: #111827 !important;
+  }
+
+  .mdc-text-field__input::placeholder {
+    color: #9ca3af !important;
+  }
+
+  .mdc-label,
+  .mat-mdc-checkbox label {
+    color: #374151 !important;
+  }
+}
