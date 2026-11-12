@@ -13,6 +13,11 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.web.cors.CorsConfiguration;
+import org.springframework.web.cors.CorsConfigurationSource;
+import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
+
+import java.util.List;
 
 @Configuration
 @EnableMethodSecurity(prePostEnabled = true)
@@ -39,19 +44,33 @@ public class WebSecurityConfig {
         return new BCryptPasswordEncoder();
     }
 
+    // ✅ Configuration CORS explicite pour autoriser Vercel
+    @Bean
+    public CorsConfigurationSource corsConfigurationSource() {
+        CorsConfiguration configuration = new CorsConfiguration();
+        configuration.setAllowedOriginPatterns(List.of("*")); // Autorise Vercel et les requêtes externes
+        configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"));
+        configuration.setAllowedHeaders(List.of("*"));
+        configuration.setAllowCredentials(true);
+        
+        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+        source.registerCorsConfiguration("/**", configuration);
+        return source;
+    }
+
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http.csrf(csrf -> csrf.disable())
-            .cors(cors -> {})
+            .cors(cors -> cors.configurationSource(corsConfigurationSource())) 
             .exceptionHandling(exception -> exception
                 // En cas de token manquant ou invalide -> 401 Unauthorized
                 .authenticationEntryPoint(unauthorizedHandler)
-                // En cas de rôle insuffisant -> 403 Forbidden (demandé par le CDC !)
+                // En cas de rôle insuffisant -> 403 Forbidden
                 .accessDeniedHandler((request, response, accessDeniedException) -> {
                     response.setStatus(HttpServletResponse.SC_FORBIDDEN);
                     response.setContentType("application/json");
                     response.setCharacterEncoding("UTF-8");
-                    response.getWriter().write("{\"status\": 403, \"error\": \"Forbidden\", \"message\": \"Accès refusé : vos droits sont insuffisants pour valider ce sujet !\"}");
+                    response.getWriter().write("{\"status\": 403, \"error\": \"Forbidden\", \"message\": \"Accès refusé : vos droits sont insuffisants !\"}");
                 })
             )
             .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
