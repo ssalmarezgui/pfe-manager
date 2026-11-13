@@ -34,6 +34,20 @@ import { formlyConfigFactory, PaginatorI18nService } from '@shared';
 import { InMemDataService } from '@shared/in-mem/in-mem-data.service';
 import { routes } from './app.routes';
 
+import { ErrorHandler, Injectable } from '@angular/core';
+
+@Injectable()
+export class ChunkErrorHandler implements ErrorHandler {
+  handleError(error: any): void {
+    const chunkFailedMessage = /Loading chunk [\d]+ failed|Failed to fetch dynamically imported module/i;
+    if (error?.message && chunkFailedMessage.test(error.message)) {
+      window.location.reload();
+    } else {
+      console.error(error);
+    }
+  }
+}
+
 export const appConfig: ApplicationConfig = {
   providers: [
     provideBrowserGlobalErrorListeners(),
@@ -52,6 +66,8 @@ export const appConfig: ApplicationConfig = {
       loader: provideTranslateHttpLoader({ prefix: 'i18n/', suffix: '.json' }),
     }),
     importProvidersFrom(NgxPermissionsModule.forRoot()),
+
+    { provide: ErrorHandler, useClass: ChunkErrorHandler },
     provideFormlyCore([...withFormlyMaterial()]),
     {
       provide: FORMLY_CONFIG,
