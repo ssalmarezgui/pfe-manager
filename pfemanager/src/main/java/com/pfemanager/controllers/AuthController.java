@@ -114,13 +114,30 @@ public class AuthController {
                 break;
 
             case "enseignant":
-                Role enseignantRole = roleRepository.findByLibelle(ERole.ROLE_ENSEIGNANT)
-                        .orElseThrow(() -> new RuntimeException("Erreur: Rôle Enseignant introuvable."));
-                roles.add(enseignantRole);
-                if (signUpRequest.getIdLabo() != null) {
-                    laboRepository.findById(signUpRequest.getIdLabo()).ifPresent(user::setLabo);
-                }
-                break;
+    Role enseignantRole = roleRepository.findByLibelle(ERole.ROLE_ENSEIGNANT)
+            .orElseThrow(() -> new RuntimeException("Erreur: Rôle Enseignant introuvable."));
+    roles.add(enseignantRole);
+
+    if (signUpRequest.getNomLabo() != null && !signUpRequest.getNomLabo().trim().isEmpty()) {
+        String nomLab = signUpRequest.getNomLabo().trim();
+        LaboRecherche labo = laboRepository.findAll().stream()
+                .filter(l -> l.getNom() != null && l.getNom().equalsIgnoreCase(nomLab))
+                .findFirst()
+                .orElseGet(() -> {
+                    LaboRecherche nouveau = new LaboRecherche();
+                    nouveau.setNom(nomLab);
+                    nouveau.setDomaine("Informatique & Recherche");
+                    nouveau.setEtablissement("ENSI Manouba");
+                    nouveau.setEmail(signUpRequest.getEmail());
+                    nouveau.setTel(signUpRequest.getTel());
+                    nouveau.setAdresse("Campus Universitaire de la Manouba");
+                    return laboRepository.save(nouveau);
+                });
+        user.setLabo(labo);
+    } else if (signUpRequest.getIdLabo() != null) {
+        laboRepository.findById(signUpRequest.getIdLabo()).ifPresent(user::setLabo);
+    }
+    break;
 
             default:
                 Role etudiantRole = roleRepository.findByLibelle(ERole.ROLE_ETUDIANT)

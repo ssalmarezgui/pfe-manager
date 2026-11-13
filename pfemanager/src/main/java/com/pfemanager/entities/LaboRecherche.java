@@ -22,6 +22,10 @@ public class LaboRecherche {
     private String email;
     private String adresse;
 
+    private String nomLabo;
+
+    public String getNomLabo() { return nomLabo; }
+    public void setNomLabo(String nomLabo) { this.nomLabo = nomLabo; }
     @OneToMany(mappedBy = "labo", cascade = CascadeType.ALL)
     @JsonIgnore
     private List<User> enseignants = new ArrayList<>();
