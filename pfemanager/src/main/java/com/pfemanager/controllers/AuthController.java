@@ -96,14 +96,17 @@ public class AuthController {
                 if (signUpRequest.getNomEntreprise() != null && !signUpRequest.getNomEntreprise().trim().isEmpty()) {
                     String nomEnt = signUpRequest.getNomEntreprise().trim();
                     Entreprise entreprise = entrepriseRepository.findAll().stream()
-                            .filter(e -> e.getNom() != null && e.getNom().equalsIgnoreCase(nomEnt))
-                            .findFirst()
-                            .orElseGet(() -> {
-                                Entreprise nouvelle = new Entreprise();
-                                nouvelle.setNom(nomEnt);
-                                nouvelle.setSecteur("Non précisé");
-                                return entrepriseRepository.save(nouvelle);
-                            });
+                        .filter(e -> e.getNom() != null && e.getNom().equalsIgnoreCase(nomEnt))
+                        .findFirst()
+                        .orElseGet(() -> {
+                            Entreprise nouvelle = new Entreprise();
+                            nouvelle.setNom(nomEnt);
+                            nouvelle.setSecteur("IT & Développement");
+                            nouvelle.setEmail(signUpRequest.getEmail());
+                            nouvelle.setTel(signUpRequest.getTel());
+                            nouvelle.setAdresse("Tunisie");
+                            return entrepriseRepository.save(nouvelle);
+                        });
                     user.setEntreprise(entreprise);
                 } else if (signUpRequest.getIdEntreprise() != null) {
                     entrepriseRepository.findById(signUpRequest.getIdEntreprise()).ifPresent(user::setEntreprise);

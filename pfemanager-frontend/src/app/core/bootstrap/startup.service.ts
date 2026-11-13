@@ -19,6 +19,7 @@ export class StartupService {
     { route: 'annuaire/entreprises', name: 'Entreprises', type: 'link', icon: 'business' },
     { route: 'annuaire/laboratoires', name: 'Laboratoires', type: 'link', icon: 'domain' },
     { route: 'mon-stage', name: 'Mon Stage PFE', type: 'link', icon: 'school'},
+    { route: 'mes-sujets', name: 'Mes Sujets PFE', type: 'link', icon: 'post_add' },
     { route: 'admin/validation-sujets', name: 'Validation des Sujets', type: 'link', icon: 'check_circle' },
     { route: 'admin/utilisateurs', name: 'Gestion Utilisateurs', type: 'link', icon: 'people' },
   ];

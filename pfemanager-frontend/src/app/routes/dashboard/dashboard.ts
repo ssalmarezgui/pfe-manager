@@ -28,7 +28,9 @@ export class Dashboard implements OnInit {
 
   // Variable de rôle calculée au démarrage
   isAdmin = false;
-  userName = 'Étudiant';
+  isEntreprise = false;
+  userName = 'Utilisateur';
+  mesSujetsCount = 0;
 
   stats = [
     { title: 'Total Sujets', amount: '0', progress: 70 },
@@ -50,6 +52,16 @@ export class Dashboard implements OnInit {
           (typeof r === 'string' ? r : (r.libelle || r.name || '')).toUpperCase()
         );
         this.isAdmin = roles.some(r => r.includes('ADMIN'));
+        this.isEntreprise = roles.some(r => r.includes('ENTREPRISE') || r.includes('ENSEIGNANT'));
+
+        if (this.isEntreprise && user.idEntreprise) {
+          this.http.get<any[]>(`/api/sujets/entreprise/${user.idEntreprise}`).subscribe({
+            next: (sujets) => {
+              this.mesSujetsCount = (sujets || []).length;
+              this.cdr.detectChanges();
+            },
+          });
+        }
       } catch (e) {
         this.isAdmin = false;
       }

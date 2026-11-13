@@ -4,8 +4,16 @@
   <!-- ================= BANNIÈRE DYNAMIQUE ================= -->
   <div class="welcome-banner">
     <div class="welcome-text">
-      <h2>{{ isAdmin ? 'Tableau de Bord & Supervision' : 'Espace Étudiant PFE' }}</h2>
-      <p>{{ isAdmin ? 'Supervision globale des Projets de Fin d\'Études' : 'Bienvenue ' + userName + ' — Suivez votre projet et trouvez votre stage' }}</p>
+      <h2>
+        {{ isAdmin ? 'Tableau de Bord & Supervision' : (isEntreprise ? 'Espace Entreprise & Partenaire' : 'Espace Étudiant PFE') }}
+      </h2>
+      <p>
+        {{ isAdmin
+          ? 'Supervision globale des Projets de Fin d\'Études'
+          : (isEntreprise
+            ? 'Bienvenue ' + userName + ' — Publiez et gérez vos sujets de PFE'
+            : 'Bienvenue ' + userName + ' — Suivez votre projet et trouvez votre stage') }}
+      </p>
     </div>
     <div class="quick-actions">
       <button class="btn-action btn-primary-action" (click)="allerVers('/catalogue')">
@@ -17,6 +25,11 @@
         <button class="btn-action btn-outline-action" (click)="allerVers('/admin/validation-sujets')">
           <mat-icon>check_circle</mat-icon>
           <span>À Valider</span>
+        </button>
+      } @else if (isEntreprise) {
+        <button class="btn-action btn-outline-action" (click)="allerVers('/mes-sujets')">
+          <mat-icon>post_add</mat-icon>
+          <span>Proposer un sujet</span>
         </button>
       } @else {
         <button class="btn-action btn-outline-action" (click)="allerVers('/mon-stage')">
@@ -85,6 +98,34 @@
     </div>
 
   } 
+
+  @else if (isEntreprise) {
+    <div class="kpi-grid">
+      <div class="interactive-card card-indigo" (click)="allerVers('/mes-sujets')">
+        <div class="card-top"><div class="icon-bubble"><mat-icon>post_add</mat-icon></div><span class="live-pill">Mon Organisme</span></div>
+        <div class="card-metric"><span class="metric-label">MES SUJETS PROPOSÉS</span><h2 class="metric-value">{{ mesSujetsCount }}</h2></div>
+        <div class="card-bottom"><span class="card-link-text">Gérer ou publier un sujet</span><mat-icon class="arrow-icon">arrow_forward</mat-icon></div>
+      </div>
+
+      <div class="interactive-card card-teal" (click)="allerVers('/catalogue')">
+        <div class="card-top"><div class="icon-bubble"><mat-icon>library_books</mat-icon></div><span class="live-pill">Catalogue</span></div>
+        <div class="card-metric"><span class="metric-label">TOTAL SUJETS VALIDÉS</span><h2 class="metric-value">{{ stats[0].amount }}</h2></div>
+        <div class="card-bottom"><span class="card-link-text">Consulter le catalogue</span><mat-icon class="arrow-icon">arrow_forward</mat-icon></div>
+      </div>
+
+      <div class="interactive-card card-purple" (click)="allerVers('/annuaire/entreprises')">
+        <div class="card-top"><div class="icon-bubble"><mat-icon>business</mat-icon></div><span class="live-pill">Réseau</span></div>
+        <div class="card-metric"><span class="metric-label">ENTREPRISES PARTENAIRES</span><h2 class="metric-value">{{ stats[1].amount }}</h2></div>
+        <div class="card-bottom"><span class="card-link-text">Voir l'annuaire</span><mat-icon class="arrow-icon">arrow_forward</mat-icon></div>
+      </div>
+
+      <div class="interactive-card card-amber" (click)="allerVers('/annuaire/laboratoires')">
+        <div class="card-top"><div class="icon-bubble"><mat-icon>domain</mat-icon></div><span class="live-pill">R&D</span></div>
+        <div class="card-metric"><span class="metric-label">LABORATOIRES ENSI</span><h2 class="metric-value">{{ stats[2].amount }}</h2></div>
+        <div class="card-bottom"><span class="card-link-text">Consulter les unités</span><mat-icon class="arrow-icon">arrow_forward</mat-icon></div>
+      </div>
+    </div>
+  }
   
   <!-- ================= SI C'EST UN ÉTUDIANT (YASSINE) ================= -->
   @else {

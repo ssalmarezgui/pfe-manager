@@ -173,8 +173,7 @@ export class MesSujets implements OnInit {
             this.snackBar.open('Élément supprimé avec succès.', 'Fermer', { 
               duration: 3000, horizontalPosition: 'end', verticalPosition: 'top', panelClass: ['success-snackbar'] 
             });
-            // N'oubliez pas d'appeler ici la fonction pour rafraîchir la liste !
-            // Ex: this.chargerUtilisateurs(); OU this.chargerMesSujets();
+            this.chargerMesSujets();
           },
           error: () => {
             this.snackBar.open('Erreur lors de la suppression.', 'Fermer', { 
