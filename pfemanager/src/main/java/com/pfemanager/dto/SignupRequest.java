@@ -10,6 +10,8 @@ public class SignupRequest {
     private Long idEntreprise; // Optionnel (si rôle entreprise)
     private Long idLabo;       // Optionnel (si rôle enseignant)
 
+    private String nomEntreprise;
+
     public SignupRequest() {}
 
     public String getNom() { return nom; }
@@ -32,6 +34,9 @@ public class SignupRequest {
 
     public Long getIdEntreprise() { return idEntreprise; }
     public void setIdEntreprise(Long idEntreprise) { this.idEntreprise = idEntreprise; }
+
+    public String getNomEntreprise() { return nomEntreprise; }
+    public void setNomEntreprise(String nomEntreprise) { this.nomEntreprise = nomEntreprise; }
 
     public Long getIdLabo() { return idLabo; }
     public void setIdLabo(Long idLabo) { this.idLabo = idLabo; }

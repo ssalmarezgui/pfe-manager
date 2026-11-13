@@ -92,7 +92,20 @@ public class AuthController {
                 Role entrepriseRole = roleRepository.findByLibelle(ERole.ROLE_ENTREPRISE)
                         .orElseThrow(() -> new RuntimeException("Erreur: Rôle Entreprise introuvable."));
                 roles.add(entrepriseRole);
-                if (signUpRequest.getIdEntreprise() != null) {
+
+                if (signUpRequest.getNomEntreprise() != null && !signUpRequest.getNomEntreprise().trim().isEmpty()) {
+                    String nomEnt = signUpRequest.getNomEntreprise().trim();
+                    Entreprise entreprise = entrepriseRepository.findAll().stream()
+                            .filter(e -> e.getNom() != null && e.getNom().equalsIgnoreCase(nomEnt))
+                            .findFirst()
+                            .orElseGet(() -> {
+                                Entreprise nouvelle = new Entreprise();
+                                nouvelle.setNom(nomEnt);
+                                nouvelle.setSecteur("Non précisé");
+                                return entrepriseRepository.save(nouvelle);
+                            });
+                    user.setEntreprise(entreprise);
+                } else if (signUpRequest.getIdEntreprise() != null) {
                     entrepriseRepository.findById(signUpRequest.getIdEntreprise()).ifPresent(user::setEntreprise);
                 }
                 break;

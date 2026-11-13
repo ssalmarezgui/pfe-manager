@@ -43,14 +43,22 @@ export class Signup implements OnInit {
     tel: ['', [Validators.required]],
     role: ['etudiant', [Validators.required]],
     idEntreprise: [null as number | null],
+    nomEntreprise: [''],
     idLabo: [null as number | null],
   });
 
   ngOnInit(): void {
-    // Charger les entreprises et les labos pour les listes deroulantes
-    this.http.get<any[]>('/api/entreprises').subscribe({
-      next: (data) => (this.entreprises = data || []),
+    this.signupForm.get('role')?.valueChanges.subscribe((role) => {
+      const nomEntCtrl = this.signupForm.get('nomEntreprise');
+      if (role === 'entreprise') {
+        nomEntCtrl?.setValidators([Validators.required]);
+      } else {
+        nomEntCtrl?.clearValidators();
+        nomEntCtrl?.setValue('');
+      }
+      nomEntCtrl?.updateValueAndValidity();
     });
+
     this.http.get<any[]>('/api/labos').subscribe({
       next: (data) => (this.labos = data || []),
     });
