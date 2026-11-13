@@ -9,6 +9,63 @@
     <p class="page-subtitle">Publication, mise à jour et suivi des sujets proposés par votre organisme</p>
   </div>
 
+    <!-- ================= NOTIFICATION & CANDIDATURES REÇUES ================= -->
+  @if (candidatures.length > 0) {
+    <div class="panel-box" style="margin-bottom: 24px; border-left: 4px solid #4f46e5;">
+      <div class="panel-header">
+        <div class="panel-title-group">
+          <div class="header-icon-box">
+            <mat-icon>notifications_active</mat-icon>
+          </div>
+          <div>
+            <div class="d-flex align-items-center gap-2">
+              <h3 class="panel-title">Candidatures Étudiants Reçues</h3>
+              @if (candidaturesEnAttenteCount > 0) {
+                <span class="count-badge" style="background: #fef3c7; color: #b45309;">
+                  {{ candidaturesEnAttenteCount }} nouvelle(s) demande(s)
+                </span>
+              }
+            </div>
+            <p class="panel-subtitle">Validez un candidat pour lui attribuer le sujet (le sujet sera retiré du catalogue public)</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="panel-body" style="display: flex; flex-direction: column; gap: 12px;">
+        @for (cand of candidatures; track cand.id) {
+          <div style="display: flex; justify-content: space-between; align-items: center; padding: 14px 16px; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 10px; flex-wrap: wrap; gap: 12px;">
+            <div>
+              <div style="font-weight: 700; color: #0f172a; font-size: 14.5px;">
+                {{ cand.etudiant?.prenom }} {{ cand.etudiant?.nom }}
+                <span style="font-weight: 400; color: #64748b; font-size: 13px;">
+                  ({{ cand.etudiant?.email }} • {{ cand.etudiant?.tel || 'Tél non précisé' }})
+                </span>
+              </div>
+              <div style="font-size: 13px; color: #475569; margin-top: 4px;">
+                Sujet demandé : <strong>{{ cand.sujet?.titre }}</strong>
+              </div>
+            </div>
+
+            <div style="display: flex; align-items: center; gap: 8px;">
+              @if (cand.statut === 'EN_ATTENTE') {
+                <button mat-flat-button style="background: #10b981; color: white; border-radius: 8px;" (click)="accepterCandidature(cand.id)">
+                  <mat-icon>check</mat-icon> Accepter
+                </button>
+                <button mat-stroked-button style="color: #ef4444; border-color: #fca5a5; border-radius: 8px;" (click)="refuserCandidature(cand.id)">
+                  <mat-icon>close</mat-icon> Refuser
+                </button>
+              } @else if (cand.statut === 'ACCEPTEE') {
+                <span class="status-pill status-valide"><span class="dot"></span> Étudiant retenu</span>
+              } @else {
+                <span class="status-pill status-refuse"><span class="dot"></span> Refusée</span>
+              }
+            </div>
+          </div>
+        }
+      </div>
+    </div>
+  }
+
   <!-- ================= DISPOSITION 2 COLONNES (GRID) ================= -->
   <div class="sujets-grid">
     

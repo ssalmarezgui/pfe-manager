@@ -38,9 +38,6 @@ public class SujetPFEService {
         return sujetRepository.findById(id);
     }
 
-    public List<SujetPFE> getValides() {
-        return sujetRepository.findByStatut(StatutSujet.VALIDE);
-    }
 
     public List<SujetPFE> getEnAttente() {
         return sujetRepository.findByStatut(StatutSujet.EN_ATTENTE);
@@ -56,10 +53,6 @@ public class SujetPFEService {
 
     public List<SujetPFE> getByEtudiant(Long idEtudiant) {
         return sujetRepository.findByEtudiantId(idEtudiant);
-    }
-
-    public List<SujetPFE> search(String keyword, String technologie) {
-        return sujetRepository.searchSujets(StatutSujet.VALIDE, keyword, technologie);
     }
 
     public SujetPFE create(SujetPFERequest request) {
@@ -105,7 +98,18 @@ public class SujetPFEService {
             return sujetRepository.save(sujet);
         }).orElseThrow(() -> new RuntimeException("Sujet introuvable avec l'id : " + id));
     }
+    
+    public List<SujetPFE> getValides() {
+        return sujetRepository.findByStatut(StatutSujet.VALIDE).stream()
+                .filter(s -> s.getEtudiant() == null)
+                .toList();
+    }
 
+    public List<SujetPFE> search(String keyword, String technologie) {
+        return sujetRepository.searchSujets(StatutSujet.VALIDE, keyword, technologie).stream()
+                .filter(s -> s.getEtudiant() == null)
+                .toList();
+    }
     public void delete(Long id) {
         sujetRepository.deleteById(id);
     }

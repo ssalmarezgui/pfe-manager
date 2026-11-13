@@ -118,10 +118,16 @@
             </span>
 
             @if (isEtudiant()) {
-              <button class="btn-apply" (click)="postuler(sujet)">
-                <mat-icon>mail_outline</mat-icon>
-                <span>Postuler</span>
-              </button>
+              @if (aDejaPostule(sujet.id)) {
+                <span class="status-pill status-pending">
+                  <span class="dot"></span> Demande envoyée
+                </span>
+              } @else {
+                <button class="btn-apply" (click)="postuler(sujet)">
+                  <mat-icon>send</mat-icon>
+                  <span>Postuler</span>
+                </button>
+              }
             }
           </div>
 

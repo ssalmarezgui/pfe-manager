@@ -48,6 +48,51 @@ export class MesSujets implements OnInit {
   isLoading = true;
   isSubmitting = false;
 
+  candidatures: any[] = [];
+
+  ngOnInit(): void {
+    this.chargerMesSujets();
+    this.chargerCandidaturesRecues();
+  }
+
+  chargerCandidaturesRecues(): void {
+    const user = this.getCurrentUser();
+    const url = user?.idEntreprise
+      ? `/api/candidatures/entreprise/${user.idEntreprise}`
+      : (user?.idLabo ? `/api/candidatures/labo/${user.idLabo}` : null);
+
+    if (!url) return;
+    this.http.get<any[]>(url, this.getHeaders()).subscribe({
+      next: (data) => {
+        this.candidatures = data || [];
+        this.cdr.detectChanges();
+      },
+    });
+  }
+
+  get candidaturesEnAttenteCount(): number {
+    return this.candidatures.filter((c) => c.statut === 'EN_ATTENTE').length;
+  }
+
+  accepterCandidature(id: number): void {
+    this.http.patch<any>(`/api/candidatures/${id}/accepter`, {}, this.getHeaders()).subscribe({
+      next: (res) => {
+        this.snackBar.open(`${res.message}`, 'Fermer', { duration: 4500 });
+        this.chargerCandidaturesRecues();
+        this.chargerMesSujets();
+      },
+    });
+  }
+
+  refuserCandidature(id: number): void {
+    this.http.patch<any>(`/api/candidatures/${id}/refuser`, {}, this.getHeaders()).subscribe({
+      next: (res) => {
+        this.snackBar.open(res.message, 'Fermer', { duration: 4000 });
+        this.chargerCandidaturesRecues();
+      },
+    });
+  }
+
   private getHeaders(): { headers: HttpHeaders } {
     const token = sessionStorage.getItem('auth-token');
     return {
@@ -60,10 +105,6 @@ export class MesSujets implements OnInit {
   private getCurrentUser(): any {
     const userStr = localStorage.getItem('auth-user') || sessionStorage.getItem('auth-user');
     return userStr ? JSON.parse(userStr) : null;
-  }
-
-  ngOnInit(): void {
-    this.chargerMesSujets();
   }
 
   chargerMesSujets(): void {

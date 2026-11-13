@@ -8,6 +8,7 @@ import { MatInputModule } from '@angular/material/input';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatChipsModule } from '@angular/material/chips';
+import { MatSnackBar } from '@angular/material/snack-bar';
 
 @Component({
   selector: 'app-catalogue',
@@ -29,18 +30,77 @@ export class Catalogue implements OnInit {
   private readonly http = inject(HttpClient);
   private readonly cdr = inject(ChangeDetectorRef);
 
+  
+
   sujets: any[] = [];
   keyword = '';
   technologie = '';
   isLoading = false;
 
-  private getHeaders(): { headers: HttpHeaders } {
-    const token = sessionStorage.getItem('auth-token');
-    return { headers: new HttpHeaders({ 'Authorization': `Bearer ${token}` }) };
-  }
+  
+  private readonly snackBar = inject(MatSnackBar);
+  mesCandidaturesIds: number[] = [];
 
   ngOnInit(): void {
     this.chargerSujets();
+    this.chargerMesCandidatures();
+  }
+
+  chargerMesCandidatures(): void {
+    const userStr = localStorage.getItem('auth-user') || sessionStorage.getItem('auth-user');
+    if (!userStr) return;
+    const user = JSON.parse(userStr);
+    if (user?.id && this.isEtudiant()) {
+      this.http.get<any[]>(`/api/candidatures/etudiant/${user.id}`, this.getHeaders()).subscribe({
+        next: (list) => {
+          this.mesCandidaturesIds = (list || []).map((c) => c.sujet?.id);
+          this.cdr.detectChanges();
+        },
+      });
+    }
+  }
+
+  aDejaPostule(sujetId: number): boolean {
+    return this.mesCandidaturesIds.includes(sujetId);
+  }
+
+  postuler(sujet: any): void {
+    const userStr = localStorage.getItem('auth-user') || sessionStorage.getItem('auth-user');
+    if (!userStr) return;
+    const user = JSON.parse(userStr);
+
+    const organisme = sujet.entreprise?.nom || (sujet.labo ? `le laboratoire ${sujet.labo.nom}` : "l'organisme");
+
+    this.http
+      .post<any>('/api/candidatures/postuler', { idSujet: sujet.id, idEtudiant: user.id }, this.getHeaders())
+      .subscribe({
+        next: (res) => {
+          this.mesCandidaturesIds.push(sujet.id);
+          this.snackBar.open(
+            res.message || `Votre demande a bien été reçue par ${organisme}. On va vous contacter prochainement pour le déroulement du stage et les entretiens.`,
+            'Fermer',
+            {
+              duration: 7000,
+              horizontalPosition: 'center',
+              verticalPosition: 'top',
+              panelClass: ['success-snackbar'],
+            }
+          );
+          this.cdr.detectChanges();
+        },
+        error: (err) => {
+          this.snackBar.open(
+            err.error?.message || 'Vous avez déjà postulé à ce sujet.',
+            'Fermer',
+            { duration: 4000, panelClass: ['error-snackbar'] }
+          );
+        },
+      });
+  }
+
+  private getHeaders(): { headers: HttpHeaders } {
+    const token = sessionStorage.getItem('auth-token');
+    return { headers: new HttpHeaders({ 'Authorization': `Bearer ${token}` }) };
   }
 
   chargerSujets(): void {
@@ -87,16 +147,6 @@ export class Catalogue implements OnInit {
   getTechList(technologies: string): string[] {
     if (!technologies) return [];
     return technologies.split(',').map((t) => t.trim()).filter((t) => t.length > 0);
-  }
-
-  postuler(sujet: any): void {
-    const contactEmail = sujet.entreprise?.email || sujet.labo?.email || 'contact@ecole.tn';
-    const sujetEmail = encodeURIComponent(`Candidature PFE : ${sujet.titre}`);
-    const corpsEmail = encodeURIComponent(
-      `Bonjour,\n\nJe souhaite vous soumettre ma candidature pour le sujet de PFE intitulé : "${sujet.titre}".\n\nCordialement,`
-    );
-
-    window.location.href = `mailto:${contactEmail}?subject=${sujetEmail}&body=${corpsEmail}`;
   }
 
   isEtudiant(): boolean {
