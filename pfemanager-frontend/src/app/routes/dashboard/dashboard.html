@@ -21,17 +21,26 @@
         <span>Explorer les sujets</span>
       </button>
 
+      <!-- Dans quick-actions de la bannière -->
       @if (isAdmin) {
+        <button class="btn-action btn-primary-action" (click)="allerVers('/catalogue')">
+          <mat-icon>search</mat-icon>
+          <span>Explorer les sujets</span>
+        </button>
         <button class="btn-action btn-outline-action" (click)="allerVers('/admin/validation-sujets')">
           <mat-icon>check_circle</mat-icon>
           <span>À Valider</span>
         </button>
       } @else if (isEntreprise) {
-        <button class="btn-action btn-outline-action" (click)="allerVers('/mes-sujets')">
+        <button class="btn-action btn-primary-action" (click)="allerVers('/mes-sujets')">
           <mat-icon>post_add</mat-icon>
-          <span>Proposer un sujet</span>
+          <span>Publier un sujet PFE</span>
         </button>
       } @else {
+        <button class="btn-action btn-primary-action" (click)="allerVers('/catalogue')">
+          <mat-icon>search</mat-icon>
+          <span>Explorer les sujets</span>
+        </button>
         <button class="btn-action btn-outline-action" (click)="allerVers('/mon-stage')">
           <mat-icon>post_add</mat-icon>
           <span>Déposer mon stage</span>
@@ -97,38 +106,33 @@
       </div>
     </div>
 
-  } 
+  } @else if (isEntreprise) {
+      <div class="kpi-grid">
+        <div class="interactive-card card-indigo" (click)="allerVers('/mes-sujets')">
+          <div class="card-top"><div class="icon-bubble"><mat-icon>assignment</mat-icon></div><span class="live-pill">Total</span></div>
+          <div class="card-metric"><span class="metric-label">SUJETS PUBLIÉS</span><h2 class="metric-value">{{ mesSujetsStats.total }}</h2></div>
+          <div class="card-bottom"><span class="card-link-text">Gérer mes sujets</span><mat-icon class="arrow-icon">arrow_forward</mat-icon></div>
+        </div>
 
-  @else if (isEntreprise) {
-    <div class="kpi-grid">
-      <div class="interactive-card card-indigo" (click)="allerVers('/mes-sujets')">
-        <div class="card-top"><div class="icon-bubble"><mat-icon>post_add</mat-icon></div><span class="live-pill">Mon Organisme</span></div>
-        <div class="card-metric"><span class="metric-label">MES SUJETS PROPOSÉS</span><h2 class="metric-value">{{ mesSujetsCount }}</h2></div>
-        <div class="card-bottom"><span class="card-link-text">Gérer ou publier un sujet</span><mat-icon class="arrow-icon">arrow_forward</mat-icon></div>
-      </div>
+        <div class="interactive-card card-teal" (click)="allerVers('/mes-sujets')">
+          <div class="card-top"><div class="icon-bubble"><mat-icon>check_circle</mat-icon></div><span class="live-pill">En ligne</span></div>
+          <div class="card-metric"><span class="metric-label">SUJETS VALIDÉS</span><h2 class="metric-value">{{ mesSujetsStats.valides }}</h2></div>
+          <div class="card-bottom"><span class="card-link-text">Visibles par les étudiants</span><mat-icon class="arrow-icon">arrow_forward</mat-icon></div>
+        </div>
 
-      <div class="interactive-card card-teal" (click)="allerVers('/catalogue')">
-        <div class="card-top"><div class="icon-bubble"><mat-icon>library_books</mat-icon></div><span class="live-pill">Catalogue</span></div>
-        <div class="card-metric"><span class="metric-label">TOTAL SUJETS VALIDÉS</span><h2 class="metric-value">{{ stats[0].amount }}</h2></div>
-        <div class="card-bottom"><span class="card-link-text">Consulter le catalogue</span><mat-icon class="arrow-icon">arrow_forward</mat-icon></div>
-      </div>
+        <div class="interactive-card card-amber" (click)="allerVers('/mes-sujets')">
+          <div class="card-top"><div class="icon-bubble"><mat-icon>schedule</mat-icon></div><span class="live-pill">Commission</span></div>
+          <div class="card-metric"><span class="metric-label">EN ATTENTE</span><h2 class="metric-value">{{ mesSujetsStats.enAttente }}</h2></div>
+          <div class="card-bottom"><span class="card-link-text">En cours d'arbitrage</span><mat-icon class="arrow-icon">arrow_forward</mat-icon></div>
+        </div>
 
-      <div class="interactive-card card-purple" (click)="allerVers('/annuaire/entreprises')">
-        <div class="card-top"><div class="icon-bubble"><mat-icon>business</mat-icon></div><span class="live-pill">Réseau</span></div>
-        <div class="card-metric"><span class="metric-label">ENTREPRISES PARTENAIRES</span><h2 class="metric-value">{{ stats[1].amount }}</h2></div>
-        <div class="card-bottom"><span class="card-link-text">Voir l'annuaire</span><mat-icon class="arrow-icon">arrow_forward</mat-icon></div>
+        <div class="interactive-card card-purple" (click)="allerVers('/mes-sujets')">
+          <div class="card-top"><div class="icon-bubble"><mat-icon>cancel</mat-icon></div><span class="live-pill">Historique</span></div>
+          <div class="card-metric"><span class="metric-label">SUJETS REFUSÉS</span><h2 class="metric-value">{{ mesSujetsStats.refuses }}</h2></div>
+          <div class="card-bottom"><span class="card-link-text">Modifier et resoumettre</span><mat-icon class="arrow-icon">arrow_forward</mat-icon></div>
+        </div>
       </div>
-
-      <div class="interactive-card card-amber" (click)="allerVers('/annuaire/laboratoires')">
-        <div class="card-top"><div class="icon-bubble"><mat-icon>domain</mat-icon></div><span class="live-pill">R&D</span></div>
-        <div class="card-metric"><span class="metric-label">LABORATOIRES ENSI</span><h2 class="metric-value">{{ stats[2].amount }}</h2></div>
-        <div class="card-bottom"><span class="card-link-text">Consulter les unités</span><mat-icon class="arrow-icon">arrow_forward</mat-icon></div>
-      </div>
-    </div>
-  }
-  
-  <!-- ================= SI C'EST UN ÉTUDIANT (YASSINE) ================= -->
-  @else {
+    } @else {
     
     <!-- 4 Cartes spécifiques pour l'Étudiant -->
     <div class="kpi-grid">

@@ -29,7 +29,7 @@ export class Sidemenu {
 
     try {
       const user = JSON.parse(raw);
-      const roles: string[] = (user.roles || []).map((r: any) => 
+      const roles: string[] = (user.roles || []).map((r: any) =>
         (typeof r === 'string' ? r : (r.libelle || r.name || '')).toUpperCase()
       );
 
@@ -38,25 +38,27 @@ export class Sidemenu {
       const isEntreprise = roles.some(r => r.includes('ENTREPRISE') || r.includes('ENSEIGNANT'));
       const route = menuItem.route || '';
 
-      // 1. Pages d'Administration (Validation des sujets, Gestion utilisateurs)
-      // 👉 SEUL l'Admin les voit
+      // 1. Pages d'Administration -> SEUL l'Admin
       if (route.includes('admin')) {
         return isAdmin;
       }
 
-      // 2. Mon Stage PFE (Dépôt et documents de stage)
-      // 👉 SEUL l'Étudiant le voit (STRICTEMENT INTERDIT À L'ADMIN)
+      // 2. Mon Stage PFE -> SEUL l'Étudiant
       if (route.includes('mon-stage')) {
         return isEtudiant;
       }
 
-      // 3. Mes Sujets (Publication pour les entreprises et labos)
-      // 👉 SEULES les entreprises et enseignants le voient
+      // 3. Mes Sujets PFE -> SEULES les Entreprises et Enseignants
       if (route.includes('mes-sujets')) {
         return isEntreprise;
       }
 
-      // 4. Pages communes (Tableau de bord, Catalogue, Annuaires)
+      // 4. Catalogue & Annuaires (Entreprises / Laboratoires) -> SEULS l'Admin et l'Étudiant
+      if (route.includes('catalogue') || route.includes('annuaire')) {
+        return isAdmin || isEtudiant;
+      }
+
+      // 5. Tableau de Bord -> Tout le monde
       return true;
     } catch (e) {
       return true;

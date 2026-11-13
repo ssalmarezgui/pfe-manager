@@ -39,6 +39,8 @@ export class Dashboard implements OnInit {
     { title: 'En Attente', amount: '0', progress: 30 },
   ];
 
+  mesSujetsStats = { total: 0, valides: 0, enAttente: 0, refuses: 0 };
+
   techList: { name: string; count: number; percentage: number }[] = [];
 
   ngOnInit(): void {
@@ -54,10 +56,20 @@ export class Dashboard implements OnInit {
         this.isAdmin = roles.some(r => r.includes('ADMIN'));
         this.isEntreprise = roles.some(r => r.includes('ENTREPRISE') || r.includes('ENSEIGNANT'));
 
-        if (this.isEntreprise && user.idEntreprise) {
-          this.http.get<any[]>(`/api/sujets/entreprise/${user.idEntreprise}`).subscribe({
+        const endpoint = user.idEntreprise
+          ? `/api/sujets/entreprise/${user.idEntreprise}`
+          : (user.idLabo ? `/api/sujets/labo/${user.idLabo}` : null);
+
+        if (this.isEntreprise && endpoint) {
+          this.http.get<any[]>(endpoint).subscribe({
             next: (sujets) => {
-              this.mesSujetsCount = (sujets || []).length;
+              const list = sujets || [];
+              this.mesSujetsStats = {
+                total: list.length,
+                valides: list.filter(s => s.statut === 'VALIDE').length,
+                enAttente: list.filter(s => s.statut === 'EN_ATTENTE').length,
+                refuses: list.filter(s => s.statut === 'REFUSE').length,
+              };
               this.cdr.detectChanges();
             },
           });
