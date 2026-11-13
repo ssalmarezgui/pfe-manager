@@ -6,9 +6,10 @@ public class SignupRequest {
     private String email;
     private String password;
     private String tel;
-    private String role; // "etudiant", "entreprise" ou "enseignant"
-    private Long idEntreprise; // Optionnel (si rôle entreprise)
-    private Long idLabo;       // Optionnel (si rôle enseignant)
+    private String role;
+    private Long idEntreprise;
+    private Long idLabo;
+    private String nomLabo;
 
     private String nomEntreprise;
 
@@ -40,4 +41,7 @@ public class SignupRequest {
 
     public Long getIdLabo() { return idLabo; }
     public void setIdLabo(Long idLabo) { this.idLabo = idLabo; }
+
+    public String getNomLabo() { return nomLabo; }
+    public void setNomLabo(String nomLabo) { this.nomLabo = nomLabo; }
 }
