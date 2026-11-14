@@ -1,6 +1,7 @@
 package com.pfemanager.controllers;
 
 import com.pfemanager.entities.Entreprise;
+import com.pfemanager.entities.User;
 import com.pfemanager.services.EntrepriseService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -20,7 +21,37 @@ public class EntrepriseController {
 
     @GetMapping
     public List<Entreprise> getAll() {
-        return entrepriseService.getAll();
+        List<Entreprise> entreprises = entrepriseService.getAll();
+        for (Entreprise e : entreprises) {
+            boolean modifie = false;
+
+            if (e.getRepresentants() != null && !e.getRepresentants().isEmpty()) {
+                User rep = e.getRepresentants().get(0);
+                if ((e.getEmail() == null || e.getEmail().isBlank()) && rep.getEmail() != null) {
+                    e.setEmail(rep.getEmail());
+                    modifie = true;
+                }
+                if ((e.getTel() == null || e.getTel().isBlank()) && rep.getTel() != null) {
+                    e.setTel(rep.getTel());
+                    modifie = true;
+                }
+            }
+
+            if (e.getSecteur() == null || e.getSecteur().isBlank() || "Non précisé".equalsIgnoreCase(e.getSecteur())) {
+                e.setSecteur("IT & Développement");
+                modifie = true;
+            }
+
+            if (e.getAdresse() == null || e.getAdresse().isBlank()) {
+                e.setAdresse("Tunis, Tunisie");
+                modifie = true;
+            }
+
+            if (modifie) {
+                entrepriseService.save(e);
+            }
+        }
+        return entreprises;
     }
 
     @GetMapping("/{id}")
