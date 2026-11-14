@@ -122,11 +122,11 @@
                 <span class="status-pill status-pending">
                   <span class="dot"></span> Demande envoyée
                 </span>
-              } @else if (getStatutCandidature(sujet.id) === 'REFUSEE') {
+              } @else if (getStatutCandidature(sujet.id)?.includes('REFUS')) {
                 <span class="status-pill" style="background: #fef2f2; color: #dc2626; font-weight: 600;">
                   <span class="dot" style="background: #dc2626;"></span> Candidature refusée
                 </span>
-              } @else if (getStatutCandidature(sujet.id) === 'ACCEPTEE') {
+              } @else if (getStatutCandidature(sujet.id)?.includes('ACCEPT')) {
                 <span class="status-pill status-valide">
                   <span class="dot"></span> Candidature acceptée
                 </span>

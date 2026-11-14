@@ -9,6 +9,8 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatChipsModule } from '@angular/material/chips';
 import { MatSnackBar } from '@angular/material/snack-bar';
+  import { NavigationEnd, Router } from '@angular/router';
+  import { Subscription, interval, filter } from 'rxjs';
 
 @Component({
   selector: 'app-catalogue',
@@ -44,29 +46,73 @@ export class Catalogue implements OnInit {
   mesCandidaturesMap: Record<number, string> = {};
   isSubmittingId: number | null = null;
 
+
+
+  // Dans ta classe Catalogue :
+  private readonly router = inject(Router);
+  private refreshSub?: Subscription;
+
+  ngOnInit(): void {
+    this.chargerSujets();
+    this.chargerMesCandidatures();
+
+    // 1. Rafraîchit automatiquement à chaque retour sur la page Catalogue
+    this.refreshSub = new Subscription();
+    this.refreshSub.add(
+      this.router.events
+        .pipe(filter((e) => e instanceof NavigationEnd))
+        .subscribe(() => {
+          if (this.router.url.includes('catalogue')) {
+            this.chargerMesCandidatures();
+            this.chargerSujets();
+          }
+        })
+    );
+
+    // 2. Rafraîchit en temps réel toutes les 5 secondes (si l'entreprise/labo accepte ou refuse)
+    this.refreshSub.add(
+      interval(5000).subscribe(() => {
+        if (this.isEtudiant() && !document.hidden) {
+          this.chargerMesCandidatures();
+        }
+      })
+    );
+  }
+
+  ngOnDestroy(): void {
+    this.refreshSub?.unsubscribe();
+  }
+
   chargerMesCandidatures(): void {
     const userStr = localStorage.getItem('auth-user') || sessionStorage.getItem('auth-user');
     if (!userStr) return;
     const user = JSON.parse(userStr);
-    if (user?.id && this.isEtudiant()) {
-      this.http.get<any[]>(`/api/candidatures/etudiant/${user.id}`, this.getHeaders()).subscribe({
+    if (!user?.id || !this.isEtudiant()) return;
+
+    // Ajout d'un timestamp anti-cache pour éviter que le navigateur garde l'ancienne réponse
+    this.http
+      .get<any[]>(`/api/candidatures/etudiant/${user.id}?t=${Date.now()}`, this.getHeaders())
+      .subscribe({
         next: (list) => {
           const map: Record<number, string> = {};
           for (const c of list || []) {
-            if (c.sujet?.id) {
-              map[Number(c.sujet.id)] = c.statut || 'EN_ATTENTE';
+            const sujetId = c.sujet?.id ?? c.idSujet ?? c.sujetId;
+            if (sujetId) {
+              // Normalise le statut quel que soit le nom du champ côté backend
+              const rawStatut = (c.statut || c.etat || 'EN_ATTENTE').toString().toUpperCase();
+              map[Number(sujetId)] = rawStatut;
             }
           }
           this.mesCandidaturesMap = map;
           this.cdr.detectChanges();
         },
       });
-    }
   }
 
   getStatutCandidature(sujetId: number): string | null {
     return this.mesCandidaturesMap[Number(sujetId)] || null;
   }
+
 
   postuler(sujet: any): void {
     if (this.isSubmittingId === sujet.id || this.getStatutCandidature(sujet.id)) return;
@@ -106,11 +152,6 @@ export class Catalogue implements OnInit {
 
   aDejaPostule(sujetId: number): boolean {
     return this.mesCandidaturesIds.includes(Number(sujetId));
-  }
-
-  ngOnInit(): void {
-    this.chargerSujets();
-    this.chargerMesCandidatures();
   }
 
 
