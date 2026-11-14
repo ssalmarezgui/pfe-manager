@@ -15,7 +15,7 @@ export function errorInterceptor(req: HttpRequest<unknown>, next: HttpHandlerFn)
   const router = inject(Router);
   const toast = inject(HotToastService);
 
-  // ✅ STATUS.NOT_FOUND a été retiré de cette liste :
+  // STATUS.NOT_FOUND a été retiré de cette liste :
   const errorPages = [STATUS.FORBIDDEN, STATUS.INTERNAL_SERVER_ERROR];
 
   const getMessage = (error: HttpErrorResponse) => {

@@ -103,17 +103,17 @@ export class MonStage implements OnInit {
     return userStr ? JSON.parse(userStr) : null;
   }
 
-  // ✅ 1. Stage officiellement validé
+  // 1. Stage officiellement validé
   get stageValide(): any {
     return this.mesStages.find(s => s.statut === 'VALIDE');
   }
 
-  // ✅ 2. Stage en cours d'arbitrage
+  // 2. Stage en cours d'arbitrage
   get stageEnAttente(): any {
     return this.mesStages.find(s => s.statut === 'EN_ATTENTE');
   }
 
-  // ✅ 3. Stage actif (Interdit d'en déposer un deuxième)
+  // 3. Stage actif (Interdit d'en déposer un deuxième)
   get hasStageActif(): boolean {
     return !!(this.stageValide || this.stageEnAttente);
   }
@@ -135,7 +135,7 @@ export class MonStage implements OnInit {
         this.mesStages = [...(data || [])];
         this.isLoading = false;
 
-        // ✅ RECHARGE AUTOMATIQUEMENT LES PDF DEPUIS MYSQL :
+        // RECHARGE AUTOMATIQUEMENT LES PDF DEPUIS MYSQL :
         if (this.stageValide) {
           if (this.stageValide.conventionNom) {
             this.documents[0].fichier = this.stageValide.conventionNom;
@@ -252,7 +252,7 @@ export class MonStage implements OnInit {
               doc.dateDepot = payload.date;
               doc.dataUrl = payload.data;
 
-              this.snackBar.open(`✅ "${doc.nom}" enregistré dans la base de données !`, 'Fermer', {
+              this.snackBar.open(` "${doc.nom}" enregistré dans la base de données !`, 'Fermer', {
                 duration: 3500,
                 horizontalPosition: 'end',
                 verticalPosition: 'top',

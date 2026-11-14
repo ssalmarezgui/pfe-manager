@@ -44,7 +44,7 @@ public class WebSecurityConfig {
         return new BCryptPasswordEncoder();
     }
 
-    // ✅ Configuration CORS explicite pour autoriser Vercel
+    // Configuration CORS explicite pour autoriser Vercel
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();

@@ -18,39 +18,21 @@
 
   <!-- ================= BARRE D'OUTILS : ONGLETS & RECHERCHE ================= -->
   <div class="toolbar-card">
-    
-    <!-- Onglets de statut -->
     <div class="status-tabs">
-      <button 
-        class="tab-btn" 
-        [class.active]="selectedTab === 'ALL'" 
-        (click)="selectedTab = 'ALL'">
+      <button class="tab-btn" [class.active]="selectedTab === 'ALL'" (click)="selectedTab = 'ALL'">
         Tous <span class="tab-count">{{ sujets.length }}</span>
       </button>
-
-      <button 
-        class="tab-btn tab-pending" 
-        [class.active]="selectedTab === 'EN_ATTENTE'" 
-        (click)="selectedTab = 'EN_ATTENTE'">
+      <button class="tab-btn tab-pending" [class.active]="selectedTab === 'EN_ATTENTE'" (click)="selectedTab = 'EN_ATTENTE'">
         En Attente <span class="tab-count count-amber">{{ countByStatus('EN_ATTENTE') }}</span>
       </button>
-
-      <button 
-        class="tab-btn" 
-        [class.active]="selectedTab === 'VALIDE'" 
-        (click)="selectedTab = 'VALIDE'">
+      <button class="tab-btn" [class.active]="selectedTab === 'VALIDE'" (click)="selectedTab = 'VALIDE'">
         Validés <span class="tab-count count-green">{{ countByStatus('VALIDE') }}</span>
       </button>
-
-      <button 
-        class="tab-btn" 
-        [class.active]="selectedTab === 'REFUSE'" 
-        (click)="selectedTab = 'REFUSE'">
+      <button class="tab-btn" [class.active]="selectedTab === 'REFUSE'" (click)="selectedTab = 'REFUSE'">
         Refusés <span class="tab-count count-red">{{ countByStatus('REFUSE') }}</span>
       </button>
     </div>
 
-    <!-- Champ de recherche en direct -->
     <div class="search-box">
       <mat-icon class="search-icon">search</mat-icon>
       <input 
@@ -65,7 +47,6 @@
         </button>
       }
     </div>
-
   </div>
 
   <!-- ================= TABLEAU DE VALIDATION ================= -->
@@ -96,13 +77,27 @@
             </td>
           </ng-container>
 
-          <!-- Proposé par (Origine avec Badge) -->
+          <!-- Proposé par / Étudiant affecté -->
           <ng-container matColumnDef="proposePar">
-            <th mat-header-cell *matHeaderCellDef>Déposant / Organisme</th>
+            <th mat-header-cell *matHeaderCellDef>Déposant / Étudiant</th>
             <td mat-cell *matCellDef="let element">
               
-              <!-- 🏢 C'est une Entreprise -->
-              @if (element.entreprise) {
+              <!-- 1. Priorité : Un étudiant est affecté à ce sujet (candidature acceptée ou sujet déposé) -->
+              @if (element.etudiant) {
+                <div class="depositor-pill">
+                  <mat-icon>school</mat-icon>
+                  <div class="dep-info">
+                    <span class="dep-name">{{ element.etudiant.prenom }} {{ element.etudiant.nom }}</span>
+                    <span class="dep-type">
+                      Étudiant
+                      @if (element.entreprise) { • {{ element.entreprise.nom }} }
+                      @else if (element.labo) { • {{ element.labo.nom }} }
+                    </span>
+                  </div>
+                </div>
+              }
+              <!-- 2. Sinon : Offre d'une Entreprise non encore attribuée -->
+              @else if (element.entreprise) {
                 <div class="depositor-pill">
                   <mat-icon>business</mat-icon>
                   <div class="dep-info">
@@ -111,8 +106,7 @@
                   </div>
                 </div>
               } 
-              
-              <!-- 🔬 C'est un Laboratoire -->
+              <!-- 3. Sinon : Offre d'un Laboratoire non encore attribuée -->
               @else if (element.labo) {
                 <div class="depositor-pill">
                   <mat-icon>domain</mat-icon>
@@ -122,39 +116,6 @@
                   </div>
                 </div>
               } 
-              
-              <!-- 👤 C'est un Utilisateur direct (Étudiant, Admin, ou Enseignant) -->
-              @else if (element.etudiant) {
-                <div class="depositor-pill">
-                  
-                  <!-- Vérification dynamique du vrai rôle pour l'icône -->
-                  @if (element.etudiant.roles && JSON.stringify(element.etudiant.roles).includes('ADMIN')) {
-                    <mat-icon>shield</mat-icon>
-                  } @else if (element.etudiant.roles && JSON.stringify(element.etudiant.roles).includes('ENSEIGNANT')) {
-                    <mat-icon>domain</mat-icon>
-                  } @else {
-                    <mat-icon>school</mat-icon>
-                  }
-
-                  <div class="dep-info">
-                    <span class="dep-name">{{ element.etudiant.prenom }} {{ element.etudiant.nom }}</span>
-                    
-                    <!-- Vérification dynamique du vrai rôle pour le sous-titre -->
-                    <span class="dep-type">
-                      @if (element.etudiant.roles && JSON.stringify(element.etudiant.roles).includes('ADMIN')) {
-                        Administrateur
-                      } @else if (element.etudiant.roles && JSON.stringify(element.etudiant.roles).includes('ENSEIGNANT')) {
-                        Enseignant
-                      } @else {
-                        Étudiant
-                      }
-                    </span>
-                  </div>
-                  
-                </div>
-              } 
-              
-              <!-- ❓ Aucun déposant spécifié -->
               @else {
                 <div class="depositor-pill depositor-unknown">
                   <mat-icon>help_outline</mat-icon>
@@ -164,7 +125,6 @@
                   </div>
                 </div>
               }
-              
             </td>
           </ng-container>
 
@@ -191,12 +151,12 @@
             </td>
           </ng-container>
 
+          <!-- Papiers Déposés : UNIQUEMENT lorsqu'un étudiant est affecté au sujet -->
           <ng-container matColumnDef="documents">
-            <th mat-header-cell *matHeaderCellDef>Papiers Déposés</th>
+            <th mat-header-cell *matHeaderCellDef>Papiers Étudiant</th>
             <td mat-cell *matCellDef="let element">
-              @if (element.statut === 'VALIDE') {
+              @if (element.etudiant && element.statut === 'VALIDE') {
                 <div class="d-flex gap-2">
-                  
                   <!-- 1. Convention -->
                   <button 
                     class="badge-doc" 
@@ -226,10 +186,9 @@
                     [title]="getDocName(element, 'rapport')">
                     <mat-icon>menu_book</mat-icon>
                   </button>
-
                 </div>
               } @else {
-                <span class="text-muted small">En attente</span>
+                <span class="text-muted small">—</span>
               }
             </td>
           </ng-container>
@@ -259,8 +218,6 @@
             <th mat-header-cell *matHeaderCellDef class="text-center">Décision Admin</th>
             <td mat-cell *matCellDef="let element" class="text-center">
               <div class="decision-group">
-                
-                <!-- Bouton Valider -->
                 <button 
                   class="btn-decision btn-approve" 
                   (click)="valider(element.id)" 
@@ -270,7 +227,6 @@
                   <span>Valider</span>
                 </button>
 
-                <!-- Bouton Refuser -->
                 <button 
                   class="btn-decision btn-reject" 
                   (click)="refuser(element.id)" 
@@ -280,14 +236,12 @@
                   <span>Refuser</span>
                 </button>
 
-                <!-- Bouton Supprimer -->
                 <button 
                   class="btn-delete" 
                   (click)="supprimer(element.id)" 
                   title="Supprimer définitivement">
                   <mat-icon>delete_outline</mat-icon>
                 </button>
-
               </div>
             </td>
           </ng-container>
