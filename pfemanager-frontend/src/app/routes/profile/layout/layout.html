@@ -1,21 +1,21 @@
 <div class="profile-single-container">
   
-  <!-- En-tête sans doublons -->
+  <!-- En-tête dynamique basé sur l'utilisateur connecté -->
   <div class="profile-header-clean">
     <div class="user-main-row">
       <div class="avatar-hero">
-        {{ getInitials(user()?.name) }}
+        {{ getInitials(currentUser.name) }}
       </div>
       <div class="user-hero-info">
         <div class="name-badge-row">
-          <h1 class="hero-name">{{ user()?.name || 'Administrateur' }}</h1>
-          <span class="role-pill-main">PFE Manager — Actif</span>
+          <h1 class="hero-name">{{ currentUser.name }}</h1>
+          <span class="role-pill-main">{{ currentUser.roleLabel }}</span>
         </div>
-        <p class="hero-email">{{ user()?.email || 'admin@pfemanager.com' }}</p>
+        <p class="hero-email">{{ currentUser.email }}</p>
       </div>
     </div>
 
-    <!-- Onglets de navigation intégrés au lieu d'une 2ème carte -->
+    <!-- Onglets de navigation intégrés -->
     <div class="profile-tabs-bar">
       <a class="tab-link" routerLink="/profile/overview" routerLinkActive="active-tab">
         <mat-icon>badge</mat-icon>

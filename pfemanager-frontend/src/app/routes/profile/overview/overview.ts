@@ -2,14 +2,13 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { MatCardModule } from '@angular/material/card';
 import { MatIconModule } from '@angular/material/icon';
-import { RouterLink } from '@angular/router';
 
 @Component({
   selector: 'app-profile-overview',
   standalone: true,
   templateUrl: './overview.html',
   styleUrl: './overview.scss',
-  imports: [CommonModule, MatCardModule, MatIconModule, RouterLink],
+  imports: [CommonModule, MatCardModule, MatIconModule],
 })
 export class ProfileOverview implements OnInit {
   currentUser: any = null;

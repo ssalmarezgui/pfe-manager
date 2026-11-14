@@ -1,6 +1,6 @@
 <div class="overview-grid">
   
-  <!-- Fiche de coordonnées académiques -->
+  <!-- Fiche de coordonnées -->
   <div class="info-card">
     <div class="card-head">
       <mat-icon>person</mat-icon>
@@ -10,15 +10,15 @@
     <div class="details-list">
       <div class="detail-row">
         <span class="label">Nom complet</span>
-        <span class="value">{{ currentUser?.prenom || 'Principal' }} {{ currentUser?.nom || 'Admin' }}</span>
+        <span class="value">{{ currentUser?.prenom }} {{ currentUser?.nom }}</span>
       </div>
       <div class="detail-row">
         <span class="label">Adresse Email</span>
-        <span class="value">{{ currentUser?.email || 'admin@pfemanager.com' }}</span>
+        <span class="value">{{ currentUser?.email || 'Non renseigné' }}</span>
       </div>
       <div class="detail-row">
         <span class="label">Téléphone</span>
-        <span class="value">{{ currentUser?.tel || '20123456' }}</span>
+        <span class="value">{{ currentUser?.tel || 'Non renseigné' }}</span>
       </div>
       <div class="detail-row">
         <span class="label">Statut du compte</span>
@@ -30,18 +30,31 @@
   <!-- Fiche de rattachement PFE -->
   <div class="info-card">
     <div class="card-head">
-      <mat-icon>school</mat-icon>
-      <h3>Rattachement Académique</h3>
+      <mat-icon>{{ currentUser?.nomEntreprise ? 'business' : 'school' }}</mat-icon>
+      <h3>{{ currentUser?.nomEntreprise ? 'Rattachement Entreprise' : 'Rattachement Académique' }}</h3>
     </div>
 
     <div class="details-list">
-      <div class="detail-row">
-        <span class="label">Établissement</span>
-        <span class="value">École Nationale des Sciences de l'Informatique</span>
-      </div>
+      @if (currentUser?.nomEntreprise) {
+        <div class="detail-row">
+          <span class="label">Entreprise</span>
+          <span class="value">{{ currentUser.nomEntreprise }}</span>
+        </div>
+      } @else if (currentUser?.nomLabo) {
+        <div class="detail-row">
+          <span class="label">Laboratoire</span>
+          <span class="value">{{ currentUser.nomLabo }}</span>
+        </div>
+      } @else {
+        <div class="detail-row">
+          <span class="label">Établissement</span>
+          <span class="value">École Nationale des Sciences de l'Informatique</span>
+        </div>
+      }
+
       <div class="detail-row">
         <span class="label">Session en cours</span>
-        <span class="value">2024 — 2025</span>
+        <span class="value">2025 — 2026</span>
       </div>
       <div class="detail-row">
         <span class="label">Rôle Système</span>
