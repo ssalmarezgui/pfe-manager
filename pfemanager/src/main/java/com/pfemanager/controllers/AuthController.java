@@ -49,25 +49,29 @@ public class AuthController {
 
     @PostMapping("/signin")
     public ResponseEntity<?> authenticateUser(@RequestBody LoginRequest loginRequest) {
-        Authentication authentication = authenticationManager.authenticate(
-                new UsernamePasswordAuthenticationToken(loginRequest.getEmail(), loginRequest.getPassword()));
+        try {
+            Authentication authentication = authenticationManager.authenticate(
+                    new UsernamePasswordAuthenticationToken(loginRequest.getEmail(), loginRequest.getPassword()));
 
-        SecurityContextHolder.getContext().setAuthentication(authentication);
-        String jwt = jwtUtils.generateJwtToken(authentication);
+            SecurityContextHolder.getContext().setAuthentication(authentication);
+            String jwt = jwtUtils.generateJwtToken(authentication);
 
-        UserDetailsImpl userDetails = (UserDetailsImpl) authentication.getPrincipal();
-        List<String> roles = userDetails.getAuthorities().stream()
-                .map(item -> item.getAuthority())
-                .collect(Collectors.toList());
+            UserDetailsImpl userDetails = (UserDetailsImpl) authentication.getPrincipal();
+            List<String> roles = userDetails.getAuthorities().stream()
+                    .map(item -> item.getAuthority())
+                    .collect(Collectors.toList());
 
-        return ResponseEntity.ok(new JwtResponse(jwt,
-                userDetails.getId(),
-                userDetails.getUsername(),
-                userDetails.getNom(),
-                userDetails.getPrenom(),
-                roles,
-                userDetails.getIdEntreprise(),
-                userDetails.getIdLabo()));
+            return ResponseEntity.ok(new JwtResponse(jwt,
+                    userDetails.getId(),
+                    userDetails.getUsername(),
+                    userDetails.getNom(),
+                    userDetails.getPrenom(),
+                    roles,
+                    userDetails.getIdEntreprise(),
+                    userDetails.getIdLabo()));
+        } catch (org.springframework.security.authentication.DisabledException e) {
+            return ResponseEntity.status(403).body(new MessageResponse("Votre compte est en attente de validation par l'administrateur."));
+        }
     }
 
     @PostMapping("/signup")
@@ -145,8 +149,9 @@ public class AuthController {
                 roles.add(etudiantRole);
                 break;
         }
-
+        
         user.setRoles(roles);
+        user.setEnabled(false);
         userRepository.save(user);
 
         // Notification par Email à l'administrateur

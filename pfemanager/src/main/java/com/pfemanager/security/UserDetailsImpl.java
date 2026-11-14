@@ -24,6 +24,46 @@ public class UserDetailsImpl implements UserDetails {
     private Long idLabo;
     private Collection<? extends GrantedAuthority> authorities;
 
+    private boolean enabled;
+
+    // Dans le constructeur, ajoute boolean enabled :
+    public UserDetailsImpl(Long id, String email, String nom, String prenom, String password,
+                           Long idEntreprise, Long idLabo, boolean enabled,
+                           Collection<? extends GrantedAuthority> authorities) {
+        this.id = id;
+        this.email = email;
+        this.nom = nom;
+        this.prenom = prenom;
+        this.password = password;
+        this.idEntreprise = idEntreprise;
+        this.idLabo = idLabo;
+        this.enabled = enabled;
+        this.authorities = authorities;
+    }
+
+    // Dans build(User user) :
+    public static UserDetailsImpl build(User user) {
+        List<GrantedAuthority> authorities = user.getRoles().stream()
+                .map(role -> new SimpleGrantedAuthority(role.getLibelle().name()))
+                .collect(Collectors.toList());
+
+        Long idEnt = (user.getEntreprise() != null) ? user.getEntreprise().getId() : null;
+        Long idLab = (user.getLabo() != null) ? user.getLabo().getId() : null;
+        boolean isApproved = user.getEnabled() != null ? user.getEnabled() : true;
+
+        return new UserDetailsImpl(
+                user.getId(),
+                user.getEmail(),
+                user.getNom(),
+                user.getPrenom(),
+                user.getPassword(),
+                idEnt,
+                idLab,
+                isApproved,
+                authorities);
+    }
+
+
     public UserDetailsImpl(Long id, String email, String nom, String prenom, String password,
                             Long idEntreprise, Long idLabo, Collection<? extends GrantedAuthority> authorities) {
         this.id = id;
@@ -34,25 +74,6 @@ public class UserDetailsImpl implements UserDetails {
         this.idEntreprise = idEntreprise;
         this.idLabo = idLabo;
         this.authorities = authorities;
-    }
-
-    public static UserDetailsImpl build(User user) {
-        List<GrantedAuthority> authorities = user.getRoles().stream()
-                .map(role -> new SimpleGrantedAuthority(role.getLibelle().name()))
-                .collect(Collectors.toList());
-
-        Long idEnt = (user.getEntreprise() != null) ? user.getEntreprise().getId() : null;
-        Long idLab = (user.getLabo() != null) ? user.getLabo().getId() : null;
-
-        return new UserDetailsImpl(
-                user.getId(),
-                user.getEmail(),
-                user.getNom(),
-                user.getPrenom(),
-                user.getPassword(),
-                idEnt,
-                idLab,
-                authorities);
     }
 
     public Long getId() { return id; }
@@ -73,6 +94,9 @@ public class UserDetailsImpl implements UserDetails {
     public boolean isAccountNonLocked() { return true; }
     @Override
     public boolean isCredentialsNonExpired() { return true; }
+
     @Override
-    public boolean isEnabled() { return true; }
+    public boolean isEnabled() {
+        return enabled;
+    }
 }

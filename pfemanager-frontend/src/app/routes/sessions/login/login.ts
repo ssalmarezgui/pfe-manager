@@ -96,8 +96,12 @@ export class Login {
 
         window.location.href = '/dashboard';
       },
-      error: () => {
-        alert('Erreur : Email ou mot de passe incorrect !');
+      error: (err: HttpErrorResponse) => {
+        if (err.status === 403 && err.error?.message) {
+          alert('⏳ ' + err.error.message);
+        } else {
+          alert('Erreur : Email ou mot de passe incorrect !');
+        }
         this.isSubmitting = false;
       },
     });

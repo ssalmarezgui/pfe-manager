@@ -77,4 +77,21 @@ public class EmailService {
             System.err.println(">>> [EMAIL WARN] " + e.getMessage());
         }
     }
+
+    public void notifierUtilisateurCompteApprouve(String userEmail, String userPrenom, String userNom) {
+        if (userEmail == null || userEmail.isBlank()) return;
+        try {
+            SimpleMailMessage message = new SimpleMailMessage();
+            message.setTo(userEmail);
+            message.setSubject("Votre compte PFE Manager a été approuvé !");
+            message.setText("Bonjour " + userPrenom + " " + userNom + ",\n\n" +
+                    "Bonne nouvelle ! Votre compte sur la plateforme PFE Manager a été validé par l'administrateur.\n" +
+                    "Vous pouvez dès à présent vous connecter avec votre adresse email et votre mot de passe pour accéder à votre espace.\n\n" +
+                    "Cordialement,\nL'équipe PFE Manager.");
+            mailSender.send(message);
+            System.out.println(">>> [EMAIL] Notification d'approbation envoyée à : " + userEmail);
+        } catch (Exception e) {
+            System.err.println(">>> [EMAIL WARN] Impossible d'envoyer l'email d'approbation : " + e.getMessage());
+        }
+    }
 }
