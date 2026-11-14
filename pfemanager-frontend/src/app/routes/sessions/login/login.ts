@@ -89,7 +89,12 @@ export class Login {
         } catch (e) {}
 
         this.isSubmitting = false;
-        this.router.navigateByUrl('/dashboard');
+        localStorage.removeItem('auth-token');
+        localStorage.removeItem('auth-user');
+        sessionStorage.setItem('auth-token', res.token);
+        sessionStorage.setItem('auth-user', JSON.stringify(res));
+
+        window.location.href = '/dashboard';
       },
       error: () => {
         alert('Erreur : Email ou mot de passe incorrect !');

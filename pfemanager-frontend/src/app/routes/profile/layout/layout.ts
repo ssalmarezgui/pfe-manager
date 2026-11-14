@@ -1,12 +1,14 @@
 import { Component, OnInit, inject } from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
+import { MatDialog } from '@angular/material/dialog';
 import { MatDividerModule } from '@angular/material/divider';
 import { MatIconModule } from '@angular/material/icon';
 import { MatListModule } from '@angular/material/list';
 import { Router, RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
 
 import { AuthService } from '@core';
+import { ConfirmLogoutDialog } from '@shared/components/confirm-logout-dialog';
 
 @Component({
   selector: 'app-profile-layout',
@@ -80,16 +82,23 @@ export class ProfileLayout implements OnInit {
       .toUpperCase();
   }
 
-  logout() {
-    this.auth.logout().subscribe(() => {
-      localStorage.removeItem('auth-token');
-      localStorage.removeItem('auth-user');
-      sessionStorage.removeItem('auth-token');
-      sessionStorage.removeItem('auth-user');
+  private readonly dialog = inject(MatDialog);
 
-      this.router.navigateByUrl('/auth/login').then(() => {
-        window.location.reload();
-      });
+  logout(): void {
+    const dialogRef = this.dialog.open(ConfirmLogoutDialog, {
+      width: '380px',
+      autoFocus: false,
+    });
+
+    dialogRef.afterClosed().subscribe((confirmed: boolean) => {
+      if (confirmed) {
+        localStorage.removeItem('auth-token');
+        localStorage.removeItem('auth-user');
+        sessionStorage.removeItem('auth-token');
+        sessionStorage.removeItem('auth-user');
+
+        window.location.href = '/auth/login';
+      }
     });
   }
 }

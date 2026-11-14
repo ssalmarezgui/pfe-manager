@@ -1,12 +1,11 @@
 import { Component, inject } from '@angular/core';
-import { toSignal } from '@angular/core/rxjs-interop';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatMenuModule } from '@angular/material/menu';
 import { MatDividerModule } from '@angular/material/divider';
-import { Router, RouterLink } from '@angular/router';
-
-import { AuthService } from '@core';
+import { RouterLink } from '@angular/router';
+import { MatDialog } from '@angular/material/dialog';
+import { ConfirmLogoutDialog } from '@shared/components/confirm-logout-dialog';
 
 @Component({
   selector: 'app-user',
@@ -15,7 +14,7 @@ import { AuthService } from '@core';
     <!-- Bouton Déclencheur : Avatar Initiales Indigo/Bleu -->
     <button mat-icon-button [matMenuTriggerFor]="menu" class="user-trigger-btn">
       <div class="header-avatar">
-        {{ getInitials(user()?.name) }}
+        {{ getInitials() }}
       </div>
     </button>
 
@@ -24,8 +23,8 @@ import { AuthService } from '@core';
       
       <!-- En-tête du menu : Identité connectée -->
       <div class="menu-user-header" (click)="$event.stopPropagation()">
-        <span class="user-title">{{ user()?.name || 'Administrateur' }}</span>
-        <span class="user-subtitle">{{ user()?.email || 'admin@pfemanager.com' }}</span>
+        <span class="user-title">{{ getUser()?.prenom }} {{ getUser()?.nom }}</span>
+        <span class="user-subtitle">{{ getUser()?.email }}</span>
       </div>
 
       <mat-divider />
@@ -115,30 +114,33 @@ import { AuthService } from '@core';
   imports: [RouterLink, MatButtonModule, MatIconModule, MatMenuModule, MatDividerModule],
 })
 export class UserButton {
-  private readonly auth = inject(AuthService);
-  private readonly router = inject(Router);
+  private readonly dialog = inject(MatDialog);
 
-  user = toSignal(this.auth.user());
-
-  getInitials(name?: string): string {
-    if (!name) return 'A';
-    return name
-      .trim()
-      .split(' ')
-      .map(part => part.charAt(0))
-      .slice(0, 2)
-      .join('')
-      .toUpperCase();
+  getUser(): any {
+    const raw = localStorage.getItem('auth-user') || sessionStorage.getItem('auth-user');
+    return raw ? JSON.parse(raw) : null;
   }
 
-  logout() {
-    this.auth.logout().subscribe(() => {
-      sessionStorage.removeItem('auth-token');
-      sessionStorage.removeItem('auth-user');
-      
-      this.router.navigateByUrl('/auth/login').then(() => {
-        window.location.reload();
-      });
+  getInitials(): string {
+    const u = this.getUser();
+    return ((u?.prenom?.charAt(0) || '') + (u?.nom?.charAt(0) || 'U')).toUpperCase();
+  }
+
+  logout(): void {
+    const dialogRef = this.dialog.open(ConfirmLogoutDialog, {
+      width: '380px',
+      autoFocus: false,
+    });
+
+    dialogRef.afterClosed().subscribe((confirmed: boolean) => {
+      if (confirmed) {
+        localStorage.removeItem('auth-token');
+        localStorage.removeItem('auth-user');
+        sessionStorage.removeItem('auth-token');
+        sessionStorage.removeItem('auth-user');
+
+        window.location.href = '/auth/login';
+      }
     });
   }
 }

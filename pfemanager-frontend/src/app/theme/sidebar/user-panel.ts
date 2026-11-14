@@ -1,8 +1,10 @@
 import { Component, ViewEncapsulation, inject } from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
+import { MatDialog } from '@angular/material/dialog';
 import { MatIconModule } from '@angular/material/icon';
 import { Router, RouterLink } from '@angular/router';
 import { AuthService } from '@core/authentication';
+import { ConfirmLogoutDialog } from '@shared/components/confirm-logout-dialog';
 
 @Component({
   selector: 'app-user-panel',
@@ -46,14 +48,23 @@ export class UserPanel {
     return ((prenom?.charAt(0) || '') + (nom?.charAt(0) || 'U')).toUpperCase();
   }
 
-  logout() {
-    this.auth.logout().subscribe(() => {
-      sessionStorage.removeItem('auth-token');
-      sessionStorage.removeItem('auth-user');
-      
-      this.router.navigateByUrl('/auth/login').then(() => {
-        window.location.reload();
-      });
+  private readonly dialog = inject(MatDialog);
+
+  logout(): void {
+    const dialogRef = this.dialog.open(ConfirmLogoutDialog, {
+      width: '380px',
+      autoFocus: false,
+    });
+
+    dialogRef.afterClosed().subscribe((confirmed: boolean) => {
+      if (confirmed) {
+        localStorage.removeItem('auth-token');
+        localStorage.removeItem('auth-user');
+        sessionStorage.removeItem('auth-token');
+        sessionStorage.removeItem('auth-user');
+
+        window.location.href = '/auth/login';
+      }
     });
   }
 }
