@@ -118,14 +118,22 @@
             </span>
 
             @if (isEtudiant()) {
-              @if (aDejaPostule(sujet.id)) {
+              @if (getStatutCandidature(sujet.id) === 'EN_ATTENTE') {
                 <span class="status-pill status-pending">
                   <span class="dot"></span> Demande envoyée
                 </span>
+              } @else if (getStatutCandidature(sujet.id) === 'REFUSEE') {
+                <span class="status-pill" style="background: #fef2f2; color: #dc2626; font-weight: 600;">
+                  <span class="dot" style="background: #dc2626;"></span> Candidature refusée
+                </span>
+              } @else if (getStatutCandidature(sujet.id) === 'ACCEPTEE') {
+                <span class="status-pill status-valide">
+                  <span class="dot"></span> Candidature acceptée
+                </span>
               } @else {
-                <button class="btn-apply" (click)="postuler(sujet)">
+                <button class="btn-apply" [disabled]="isSubmittingId === sujet.id" (click)="postuler(sujet)">
                   <mat-icon>send</mat-icon>
-                  <span>Postuler</span>
+                  <span>{{ isSubmittingId === sujet.id ? 'Envoi...' : 'Postuler' }}</span>
                 </button>
               }
             }

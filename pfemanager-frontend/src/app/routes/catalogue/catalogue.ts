@@ -41,14 +41,35 @@ export class Catalogue implements OnInit {
   private readonly snackBar = inject(MatSnackBar);
   mesCandidaturesIds: number[] = [];
 
+  mesCandidaturesMap: Record<number, string> = {};
   isSubmittingId: number | null = null;
 
-  aDejaPostule(sujetId: number): boolean {
-    return this.mesCandidaturesIds.includes(Number(sujetId));
+  chargerMesCandidatures(): void {
+    const userStr = localStorage.getItem('auth-user') || sessionStorage.getItem('auth-user');
+    if (!userStr) return;
+    const user = JSON.parse(userStr);
+    if (user?.id && this.isEtudiant()) {
+      this.http.get<any[]>(`/api/candidatures/etudiant/${user.id}`, this.getHeaders()).subscribe({
+        next: (list) => {
+          const map: Record<number, string> = {};
+          for (const c of list || []) {
+            if (c.sujet?.id) {
+              map[Number(c.sujet.id)] = c.statut || 'EN_ATTENTE';
+            }
+          }
+          this.mesCandidaturesMap = map;
+          this.cdr.detectChanges();
+        },
+      });
+    }
+  }
+
+  getStatutCandidature(sujetId: number): string | null {
+    return this.mesCandidaturesMap[Number(sujetId)] || null;
   }
 
   postuler(sujet: any): void {
-    if (this.isSubmittingId === sujet.id || this.aDejaPostule(sujet.id)) return;
+    if (this.isSubmittingId === sujet.id || this.getStatutCandidature(sujet.id)) return;
 
     const userStr = localStorage.getItem('auth-user') || sessionStorage.getItem('auth-user');
     if (!userStr) return;
@@ -63,34 +84,28 @@ export class Catalogue implements OnInit {
       .subscribe({
         next: (res) => {
           this.isSubmittingId = null;
-          // Réaffectation du tableau pour forcer la mise à jour immédiate du template Angular
-          this.mesCandidaturesIds = [...this.mesCandidaturesIds, Number(sujet.id)];
+          this.mesCandidaturesMap = { ...this.mesCandidaturesMap, [Number(sujet.id)]: 'EN_ATTENTE' };
           this.cdr.detectChanges();
 
           this.snackBar.open(
             res.message || `Votre demande a bien été reçue par ${organisme}. Nous allons vous contacter prochainement pour le déroulement du stage et les entretiens.`,
             'Fermer',
-            {
-              duration: 7000,
-              horizontalPosition: 'center',
-              verticalPosition: 'top',
-            }
+            { duration: 7000, horizontalPosition: 'center', verticalPosition: 'top' }
           );
         },
         error: (err) => {
           this.isSubmittingId = null;
           if (err.status === 400) {
-            this.mesCandidaturesIds = [...this.mesCandidaturesIds, Number(sujet.id)];
+            this.chargerMesCandidatures();
           }
           this.cdr.detectChanges();
-
-          this.snackBar.open(
-            err.error?.message || 'Vous avez déjà postulé à ce sujet.',
-            'Fermer',
-            { duration: 4000 }
-          );
+          this.snackBar.open(err.error?.message || 'Vous avez déjà postulé à ce sujet.', 'Fermer', { duration: 4000 });
         },
       });
+  }
+
+  aDejaPostule(sujetId: number): boolean {
+    return this.mesCandidaturesIds.includes(Number(sujetId));
   }
 
   ngOnInit(): void {
@@ -98,19 +113,7 @@ export class Catalogue implements OnInit {
     this.chargerMesCandidatures();
   }
 
-  chargerMesCandidatures(): void {
-    const userStr = localStorage.getItem('auth-user') || sessionStorage.getItem('auth-user');
-    if (!userStr) return;
-    const user = JSON.parse(userStr);
-    if (user?.id && this.isEtudiant()) {
-      this.http.get<any[]>(`/api/candidatures/etudiant/${user.id}`, this.getHeaders()).subscribe({
-        next: (list) => {
-          this.mesCandidaturesIds = (list || []).map((c) => c.sujet?.id);
-          this.cdr.detectChanges();
-        },
-      });
-    }
-  }
+
 
   private getHeaders(): { headers: HttpHeaders } {
     const token = sessionStorage.getItem('auth-token');

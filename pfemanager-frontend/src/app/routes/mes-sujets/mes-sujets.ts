@@ -50,9 +50,63 @@ export class MesSujets implements OnInit {
 
   candidatures: any[] = [];
 
+
   ngOnInit(): void {
     this.chargerMesSujets();
     this.chargerCandidaturesRecues();
+  }
+
+  actionLoadingId: number | null = null;
+
+  accepterCandidature(id: number): void {
+    if (this.actionLoadingId === id) return;
+    this.actionLoadingId = id;
+
+    // Mise à jour visuelle immédiate (Optimistic UI)
+    this.candidatures = this.candidatures.map(c =>
+      c.id === id ? { ...c, statut: 'ACCEPTEE' } : c
+    );
+    this.cdr.detectChanges();
+
+    this.http.patch<any>(`/api/candidatures/${id}/accepter`, {}, this.getHeaders()).subscribe({
+      next: (res) => {
+        this.actionLoadingId = null;
+        this.snackBar.open(`${res.message}`, 'Fermer', { duration: 4500 });
+        this.chargerCandidaturesRecues();
+        this.chargerMesSujets();
+        this.cdr.detectChanges();
+      },
+      error: () => {
+        this.actionLoadingId = null;
+        this.chargerCandidaturesRecues();
+        this.cdr.detectChanges();
+      },
+    });
+  }
+
+  refuserCandidature(id: number): void {
+    if (this.actionLoadingId === id) return;
+    this.actionLoadingId = id;
+
+    // Mise à jour visuelle immédiate (Optimistic UI)
+    this.candidatures = this.candidatures.map(c =>
+      c.id === id ? { ...c, statut: 'REFUSEE' } : c
+    );
+    this.cdr.detectChanges();
+
+    this.http.patch<any>(`/api/candidatures/${id}/refuser`, {}, this.getHeaders()).subscribe({
+      next: (res) => {
+        this.actionLoadingId = null;
+        this.snackBar.open(res.message, 'Fermer', { duration: 4000 });
+        this.chargerCandidaturesRecues();
+        this.cdr.detectChanges();
+      },
+      error: () => {
+        this.actionLoadingId = null;
+        this.chargerCandidaturesRecues();
+        this.cdr.detectChanges();
+      },
+    });
   }
 
   chargerCandidaturesRecues(): void {
@@ -73,26 +127,7 @@ export class MesSujets implements OnInit {
   get candidaturesEnAttenteCount(): number {
     return this.candidatures.filter((c) => c.statut === 'EN_ATTENTE').length;
   }
-
-  accepterCandidature(id: number): void {
-    this.http.patch<any>(`/api/candidatures/${id}/accepter`, {}, this.getHeaders()).subscribe({
-      next: (res) => {
-        this.snackBar.open(`${res.message}`, 'Fermer', { duration: 4500 });
-        this.chargerCandidaturesRecues();
-        this.chargerMesSujets();
-      },
-    });
-  }
-
-  refuserCandidature(id: number): void {
-    this.http.patch<any>(`/api/candidatures/${id}/refuser`, {}, this.getHeaders()).subscribe({
-      next: (res) => {
-        this.snackBar.open(res.message, 'Fermer', { duration: 4000 });
-        this.chargerCandidaturesRecues();
-      },
-    });
-  }
-
+  
   private getHeaders(): { headers: HttpHeaders } {
     const token = sessionStorage.getItem('auth-token');
     return {
