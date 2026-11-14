@@ -41,6 +41,58 @@ export class Catalogue implements OnInit {
   private readonly snackBar = inject(MatSnackBar);
   mesCandidaturesIds: number[] = [];
 
+  isSubmittingId: number | null = null;
+
+  aDejaPostule(sujetId: number): boolean {
+    return this.mesCandidaturesIds.includes(Number(sujetId));
+  }
+
+  postuler(sujet: any): void {
+    if (this.isSubmittingId === sujet.id || this.aDejaPostule(sujet.id)) return;
+
+    const userStr = localStorage.getItem('auth-user') || sessionStorage.getItem('auth-user');
+    if (!userStr) return;
+    const user = JSON.parse(userStr);
+
+    const organisme = sujet.entreprise?.nom || (sujet.labo ? `le laboratoire ${sujet.labo.nom}` : "l'organisme");
+    this.isSubmittingId = sujet.id;
+    this.cdr.detectChanges();
+
+    this.http
+      .post<any>('/api/candidatures/postuler', { idSujet: sujet.id, idEtudiant: user.id }, this.getHeaders())
+      .subscribe({
+        next: (res) => {
+          this.isSubmittingId = null;
+          // Réaffectation du tableau pour forcer la mise à jour immédiate du template Angular
+          this.mesCandidaturesIds = [...this.mesCandidaturesIds, Number(sujet.id)];
+          this.cdr.detectChanges();
+
+          this.snackBar.open(
+            res.message || `Votre demande a bien été reçue par ${organisme}. Nous allons vous contacter prochainement pour le déroulement du stage et les entretiens.`,
+            'Fermer',
+            {
+              duration: 7000,
+              horizontalPosition: 'center',
+              verticalPosition: 'top',
+            }
+          );
+        },
+        error: (err) => {
+          this.isSubmittingId = null;
+          if (err.status === 400) {
+            this.mesCandidaturesIds = [...this.mesCandidaturesIds, Number(sujet.id)];
+          }
+          this.cdr.detectChanges();
+
+          this.snackBar.open(
+            err.error?.message || 'Vous avez déjà postulé à ce sujet.',
+            'Fermer',
+            { duration: 4000 }
+          );
+        },
+      });
+  }
+
   ngOnInit(): void {
     this.chargerSujets();
     this.chargerMesCandidatures();
@@ -58,44 +110,6 @@ export class Catalogue implements OnInit {
         },
       });
     }
-  }
-
-  aDejaPostule(sujetId: number): boolean {
-    return this.mesCandidaturesIds.includes(sujetId);
-  }
-
-  postuler(sujet: any): void {
-    const userStr = localStorage.getItem('auth-user') || sessionStorage.getItem('auth-user');
-    if (!userStr) return;
-    const user = JSON.parse(userStr);
-
-    const organisme = sujet.entreprise?.nom || (sujet.labo ? `le laboratoire ${sujet.labo.nom}` : "l'organisme");
-
-    this.http
-      .post<any>('/api/candidatures/postuler', { idSujet: sujet.id, idEtudiant: user.id }, this.getHeaders())
-      .subscribe({
-        next: (res) => {
-          this.mesCandidaturesIds.push(sujet.id);
-          this.snackBar.open(
-            res.message || `Votre demande a bien été reçue par ${organisme}. On va vous contacter prochainement pour le déroulement du stage et les entretiens.`,
-            'Fermer',
-            {
-              duration: 7000,
-              horizontalPosition: 'center',
-              verticalPosition: 'top',
-              panelClass: ['success-snackbar'],
-            }
-          );
-          this.cdr.detectChanges();
-        },
-        error: (err) => {
-          this.snackBar.open(
-            err.error?.message || 'Vous avez déjà postulé à ce sujet.',
-            'Fermer',
-            { duration: 4000, panelClass: ['error-snackbar'] }
-          );
-        },
-      });
   }
 
   private getHeaders(): { headers: HttpHeaders } {

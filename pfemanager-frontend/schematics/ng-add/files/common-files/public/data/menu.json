@@ -14,15 +14,21 @@
     },
     {
       "route": "entreprises",
-      "name": "entreprises",
+      "name": "Entreprises",
       "type": "link",
-      "icon": "business"
+      "icon": "business",
+      "permissions": {
+        "only": ["ROLE_ADMIN"]
+      }
     },
     {
       "route": "laboratoires",
-      "name": "laboratoires",
+      "name": "Laboratoires",
       "type": "link",
-      "icon": "biotech"
+      "icon": "domain",
+      "permissions": {
+        "only": ["ROLE_ADMIN"]
+      }
     },
     {
       "route": "mon-stage",

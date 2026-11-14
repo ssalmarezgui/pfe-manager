@@ -36,7 +36,7 @@ export class Sidemenu {
       const isAdmin = roles.some(r => r.includes('ADMIN'));
       const isEtudiant = roles.some(r => r.includes('ETUDIANT'));
       const isEntreprise = roles.some(r => r.includes('ENTREPRISE') || r.includes('ENSEIGNANT'));
-      const route = menuItem.route || '';
+      const route = (menuItem.route || '').toLowerCase();
 
       // 1. Pages d'Administration -> SEUL l'Admin
       if (route.includes('admin')) {
@@ -53,12 +53,17 @@ export class Sidemenu {
         return isEntreprise;
       }
 
-      // 4. Catalogue & Annuaires (Entreprises / Laboratoires) -> SEULS l'Admin et l'Étudiant
-      if (route.includes('catalogue') || route.includes('annuaire')) {
+      // 4. Annuaires (Entreprises / Laboratoires) -> SEUL l'Admin
+      if (route.includes('annuaire') || route.includes('entreprise') || route.includes('laboratoire')) {
+        return isAdmin;
+      }
+
+      // 5. Catalogue des Sujets -> SEULS l'Admin et l'Étudiant
+      if (route.includes('catalogue')) {
         return isAdmin || isEtudiant;
       }
 
-      // 5. Tableau de Bord -> Tout le monde
+      // 6. Tableau de Bord -> Tout le monde
       return true;
     } catch (e) {
       return true;
