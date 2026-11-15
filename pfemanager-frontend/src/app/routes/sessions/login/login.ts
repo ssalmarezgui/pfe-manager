@@ -1,13 +1,13 @@
-import { Component, inject } from '@angular/core';
+import { ChangeDetectorRef, Component, inject } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
-import { RouterLink } from '@angular/router';
-import { HttpErrorResponse } from '@angular/common/http';
+import { Router, RouterLink } from '@angular/router';
+import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { MatButtonModule } from '@angular/material/button';
 import { MatCheckboxModule } from '@angular/material/checkbox';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MtxButtonModule } from '@ng-matero/extensions/button';
-import { AuthService } from '@core/authentication';
+import { TokenService } from '@core/authentication';
 
 @Component({
   selector: 'app-login',
@@ -25,7 +25,10 @@ import { AuthService } from '@core/authentication';
 })
 export class Login {
   private readonly fb = inject(FormBuilder);
-  private readonly auth = inject(AuthService);
+  private readonly http = inject(HttpClient);
+  private readonly router = inject(Router);
+  private readonly tokenService = inject(TokenService);
+  private readonly cdr = inject(ChangeDetectorRef);
 
   isSubmitting = false;
   statusMessage = '';
@@ -54,27 +57,50 @@ export class Login {
 
     this.isSubmitting = true;
     this.statusMessage = '';
+    this.cdr.detectChanges();
 
-    this.auth.login(this.username.value, this.password.value, this.rememberMe.value).subscribe({
-      next: () => {
-        this.isSubmitting = false;
-        window.location.href = '/dashboard';
-      },
-      error: (err: HttpErrorResponse) => {
-        this.isSubmitting = false;
-        if (err.status === 403) {
-          this.statusType = 'pending';
-          this.statusMessage =
-            err.error?.message ||
-            "Votre compte est suspendu ou en attente de validation par l'administrateur.";
-        } else if (err.status === 401) {
-          this.statusType = 'error';
-          this.statusMessage = 'Email ou mot de passe incorrect.';
-        } else {
-          this.statusType = 'error';
-          this.statusMessage = err.error?.message || 'Erreur lors de la connexion.';
-        }
-      },
-    });
+    this.http
+      .post<any>('/api/auth/signin', {
+        email: this.username.value,
+        password: this.password.value,
+      })
+      .subscribe({
+        next: (res) => {
+          this.isSubmitting = false;
+          localStorage.setItem('auth-user', JSON.stringify(res));
+
+          // Récupère le JWT quelle que soit la clé renvoyée par Spring Boot
+          const jwt =
+            res?.token ||
+            res?.accessToken ||
+            res?.access_token ||
+            res?.jwt ||
+            (typeof res === 'string' ? res : '');
+
+          this.tokenService.set({
+            access_token: jwt,
+            token_type: 'Bearer',
+          });
+
+          this.cdr.detectChanges();
+          this.router.navigateByUrl('/dashboard');
+        },
+        error: (err: HttpErrorResponse) => {
+          this.isSubmitting = false;
+          if (err.status === 403) {
+            this.statusType = 'pending';
+            this.statusMessage =
+              err.error?.message ||
+              "Votre compte est suspendu ou en attente de validation par l'administrateur.";
+          } else if (err.status === 401) {
+            this.statusType = 'error';
+            this.statusMessage = 'Email ou mot de passe incorrect.';
+          } else {
+            this.statusType = 'error';
+            this.statusMessage = err.error?.message || 'Erreur lors de la connexion.';
+          }
+          this.cdr.detectChanges();
+        },
+      });
   }
 }
