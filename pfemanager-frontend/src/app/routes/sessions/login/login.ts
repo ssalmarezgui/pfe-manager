@@ -1,14 +1,12 @@
 import { Component, inject } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
-import { Router, RouterLink } from '@angular/router';
+import { RouterLink } from '@angular/router';
 import { HttpErrorResponse } from '@angular/common/http';
 import { MatButtonModule } from '@angular/material/button';
-import { MatCardModule } from '@angular/material/card';
 import { MatCheckboxModule } from '@angular/material/checkbox';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MtxButtonModule } from '@ng-matero/extensions/button';
-import { TranslatePipe } from '@ngx-translate/core';
 import { AuthService } from '@core/authentication';
 
 @Component({
@@ -19,17 +17,14 @@ import { AuthService } from '@core/authentication';
     ReactiveFormsModule,
     RouterLink,
     MatButtonModule,
-    MatCardModule,
     MatCheckboxModule,
     MatFormFieldModule,
     MatInputModule,
     MtxButtonModule,
-    TranslatePipe,
   ],
 })
 export class Login {
   private readonly fb = inject(FormBuilder);
-  private readonly router = inject(Router);
   private readonly auth = inject(AuthService);
 
   isSubmitting = false;
@@ -63,7 +58,7 @@ export class Login {
     this.auth.login(this.username.value, this.password.value, this.rememberMe.value).subscribe({
       next: () => {
         this.isSubmitting = false;
-        this.router.navigateByUrl('/dashboard');
+        window.location.href = '/dashboard';
       },
       error: (err: HttpErrorResponse) => {
         this.isSubmitting = false;
