@@ -61,11 +61,9 @@ export class Login {
     this.statusMessage = '';
 
     this.auth.login(this.username.value, this.password.value, this.rememberMe.value).subscribe({
-      next: (authenticated) => {
+      next: () => {
         this.isSubmitting = false;
-        if (authenticated) {
-          this.router.navigateByUrl('/');
-        }
+        this.router.navigateByUrl('/dashboard');
       },
       error: (err: HttpErrorResponse) => {
         this.isSubmitting = false;
