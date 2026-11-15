@@ -57,6 +57,17 @@ public class UserController {
         return ResponseEntity.ok(Map.of("message", "Compte approuvé et email de confirmation envoyé."));
     }
 
+    @PatchMapping("/{id}/suspendre")
+    public ResponseEntity<?> suspendreCompte(@PathVariable("id") Long id) {
+        User user = userService.getById(id)
+                .orElseThrow(() -> new RuntimeException("Utilisateur introuvable"));
+        user.setEnabled(false);
+        userService.save(user);
+
+        emailService.notifierUtilisateurCompteSuspendu(user.getEmail(), user.getPrenom(), user.getNom());
+        return ResponseEntity.ok(Map.of("message", "Compte suspendu et email de notification envoyé."));
+    }
+
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> delete(@PathVariable("id") Long id) {
         userService.delete(id);

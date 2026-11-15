@@ -33,18 +33,18 @@ export class Utilisateurs implements OnInit {
 
   validatingId: number | null = null;
 
-  validerCompte(user: any): void {
+  changerStatutCompte(user: any, approuver: boolean): void {
     if (this.validatingId === user.id) return;
     this.validatingId = user.id;
 
-    // Mise à jour immédiate (Optimistic UI)
-    this.users = this.users.map(u => (u.id === user.id ? { ...u, enabled: true } : u));
+    this.users = this.users.map(u => (u.id === user.id ? { ...u, enabled: approuver } : u));
     this.cdr.detectChanges();
 
-    this.http.patch<any>(`/api/users/${user.id}/valider`, {}, this.getHeaders()).subscribe({
+    const action = approuver ? 'valider' : 'suspendre';
+    this.http.patch<any>(`/api/users/${user.id}/${action}`, {}, this.getHeaders()).subscribe({
       next: (res) => {
         this.validatingId = null;
-        this.snackBar.open(`${res.message || 'Compte approuvé !'}`, 'Fermer', {
+        this.snackBar.open(res.message || (approuver ? 'Compte validé !' : 'Compte suspendu.'), 'Fermer', {
           duration: 4000,
           horizontalPosition: 'end',
           verticalPosition: 'top',
@@ -55,7 +55,7 @@ export class Utilisateurs implements OnInit {
       error: () => {
         this.validatingId = null;
         this.chargerUtilisateurs();
-        this.snackBar.open("Erreur lors de la validation du compte.", 'Fermer', {
+        this.snackBar.open('Erreur lors de la mise à jour du compte.', 'Fermer', {
           duration: 3500,
           horizontalPosition: 'end',
           verticalPosition: 'top',

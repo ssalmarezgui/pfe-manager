@@ -1,61 +1,150 @@
-<div class="d-flex w-full h-full">
-  <mat-card class="m-auto" style="max-width: 380px">
-    <mat-card-header class="m-b-24">
-      <mat-card-title>
-        {{ 'signup_welcome' | translate }},
-        <br />
-        {{ 'signup_title' | translate }}
-      </mat-card-title>
-    </mat-card-header>
+<div class="signup-page-wrapper" style="width: 100vw; min-height: 100vh; display: flex; align-items: center; justify-content: center; background: #f3f4f6; position: fixed; top: 0; left: 0; z-index: 9999; overflow-y: auto; padding: 20px;">
+  
+  <div class="signup-card-box" style="display: flex; width: 950px; max-width: 100%; background: #ffffff; border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); overflow: hidden;">
+    
+    <!-- Panneau de Gauche -->
+    <div style="flex: 1; background: linear-gradient(135deg, #4f46e5 0%, #3b82f6 100%); color: white; padding: 40px; display: flex; flex-direction: column; justify-content: space-between;">
+      <div>
+        <span style="background: rgba(255,255,255,0.2); padding: 6px 14px; border-radius: 20px; font-size: 12px; font-weight: bold;">PFE Manager</span>
+      </div>
+      <div class="my-auto py-5">
+        <h1 style="font-size: 26px; font-weight: bold; margin-bottom: 12px; color: white;">Rejoignez la Plateforme</h1>
+        <p style="font-size: 14px; opacity: 0.75; margin: 0; line-height: 1.5;">Créez votre compte en tant qu'Étudiant, Entreprise ou Enseignant pour collaborer facilement.</p>
+      </div>
+      <div style="font-size: 12px; opacity: 0.5;">
+        ENSI - École Nationale des Sciences de l'Informatique
+      </div>
+    </div>
 
-    <mat-card-content>
-      <form class="form-field-full" [formGroup]="registerForm">
-        <mat-form-field appearance="outline">
-          <mat-label>{{ 'username' | translate }}</mat-label>
-          <input matInput formControlName="username" required />
-          @if (registerForm.get('username')?.invalid) {
-            <mat-error>
-              <span>{{ 'validation.required' | translate }}</span>
-            </mat-error>
-          }
-        </mat-form-field>
-
-        <mat-form-field appearance="outline">
-          <mat-label>{{ 'password' | translate }}</mat-label>
-          <input matInput type="password" formControlName="password" required />
-          @if (registerForm.get('password')?.invalid) {
-            <mat-error>
-              <span>{{ 'validation.required' | translate }}</span>
-            </mat-error>
-          }
-        </mat-form-field>
-
-        <mat-form-field appearance="outline">
-          <mat-label>{{ 'confirm_password' | translate }}</mat-label>
-          <input matInput type="password" formControlName="confirmPassword" required />
-          @if (registerForm.get('confirmPassword')?.hasError('required')) {
-            <mat-error>
-              <span>{{ 'validation.required' | translate }}</span>
-            </mat-error>
-          }
-          @if (registerForm.get('confirmPassword')?.hasError('mismatch')) {
-            <mat-error>
-              <span>
-                {{ 'validation.inconsistent' | translate: { value: 'password' | translate } }}
-              </span>
-            </mat-error>
-          }
-        </mat-form-field>
-
-        <mat-checkbox>{{ 'read_and_agree' | translate }}</mat-checkbox>
-
-        <button class="w-full m-y-16" mat-flat-button>{{ 'signup' | translate }}</button>
-
-        <div>
-          <span>{{ 'have_an_account' | translate }}</span>
-          <a routerLink="/auth/login">{{ 'login' | translate }}</a>
+    <!-- Panneau de Droite -->
+    <div style="flex: 1.3; padding: 40px; display: flex; flex-direction: column; justify-content: center; max-height: 90vh; overflow-y: auto;">
+      
+      @if (registrationSuccess) {
+        <!-- ÉCRAN DE CONFIRMATION & ATTENTE DE VALIDATION (Zéro alert navigateur) -->
+        <div style="text-align: center; padding: 24px 12px;">
+          <div style="width: 72px; height: 72px; border-radius: 50%; background: #fef3c7; color: #d97706; display: flex; align-items: center; justify-content: center; margin: 0 auto 20px; font-size: 34px;">
+            ⏳
+          </div>
+          <span style="display: inline-block; background: #fef3c7; color: #b45309; padding: 5px 14px; border-radius: 20px; font-size: 12px; font-weight: 700; margin-bottom: 14px;">
+            En attente de validation administrateur
+          </span>
+          <h2 style="font-size: 22px; font-weight: 800; color: #111827; margin-bottom: 12px;">
+            Demande d'inscription enregistrée !
+          </h2>
+          <p style="font-size: 14px; color: #4b5563; line-height: 1.6; margin-bottom: 16px;">
+            Votre compte (<strong>{{ createdEmail }}</strong>) a bien été créé. Pour des raisons de sécurité, l'administrateur doit vérifier et approuver votre profil avant votre première connexion.
+          </p>
+          <div style="background: #eff6ff; border: 1px solid #bfdbfe; color: #1e40af; padding: 14px; border-radius: 10px; font-size: 13px; line-height: 1.5; margin-bottom: 24px;">
+            ✉️ Un email de confirmation vient de vous être envoyé. Vous recevrez un second email dès que votre accès sera activé.
+          </div>
+          <a routerLink="/auth/login"
+             style="display: inline-block; width: 100%; height: 46px; line-height: 46px; background: #4f46e5; color: white; border-radius: 8px; font-size: 14px; font-weight: bold; text-decoration: none; text-align: center;">
+            Retour à la page de connexion
+          </a>
         </div>
-      </form>
-    </mat-card-content>
-  </mat-card>
+      } @else {
+        <!-- FORMULAIRE D'INSCRIPTION -->
+        <div style="margin-bottom: 20px;">
+          <h2 style="font-size: 22px; font-weight: bold; color: #111827; margin-bottom: 4px;">Créer un compte</h2>
+          <p style="font-size: 13px; color: #6b7280; margin: 0;">Remplissez les informations ci-dessous.</p>
+        </div>
+
+        @if (errorMessage) {
+          <div style="background: #fee2e2; color: #991b1b; padding: 10px 14px; border-radius: 8px; font-size: 13px; margin-bottom: 16px;">
+            {{ errorMessage }}
+          </div>
+        }
+
+        <form [formGroup]="signupForm" (ngSubmit)="register()" style="width: 100%;">
+          <div style="display: flex; gap: 12px; margin-bottom: 12px;">
+            <div style="flex: 1;">
+              <label style="display: block; font-size: 12px; font-weight: 600; color: #374151; margin-bottom: 4px;">Nom</label>
+              <mat-form-field appearance="outline" style="width: 100%;">
+                <input matInput formControlName="nom" placeholder="Nom" required />
+              </mat-form-field>
+            </div>
+            <div style="flex: 1;">
+              <label style="display: block; font-size: 12px; font-weight: 600; color: #374151; margin-bottom: 4px;">Prénom</label>
+              <mat-form-field appearance="outline" style="width: 100%;">
+                <input matInput formControlName="prenom" placeholder="Prénom" required />
+              </mat-form-field>
+            </div>
+          </div>
+
+          <div style="margin-bottom: 12px;">
+            <label style="display: block; font-size: 12px; font-weight: 600; color: #374151; margin-bottom: 4px;">Adresse Email</label>
+            <mat-form-field appearance="outline" style="width: 100%;">
+              <input matInput type="email" formControlName="email" placeholder="nom@exemple.com" required />
+            </mat-form-field>
+          </div>
+
+          <div style="display: flex; gap: 12px; margin-bottom: 12px;">
+            <div style="flex: 1;">
+              <label style="display: block; font-size: 12px; font-weight: 600; color: #374151; margin-bottom: 4px;">Téléphone</label>
+              <mat-form-field appearance="outline" style="width: 100%;">
+                <input matInput formControlName="tel" placeholder="20123456" required />
+              </mat-form-field>
+            </div>
+            <div style="flex: 1;">
+              <label style="display: block; font-size: 12px; font-weight: 600; color: #374151; margin-bottom: 4px;">Mot de passe</label>
+              <mat-form-field appearance="outline" style="width: 100%;">
+                <input matInput type="password" formControlName="password" placeholder="••••••••" required />
+              </mat-form-field>
+            </div>
+          </div>
+
+          <div style="margin-bottom: 12px;">
+            <label style="display: block; font-size: 12px; font-weight: 600; color: #374151; margin-bottom: 4px;">Type de profil</label>
+            <select formControlName="role" style="width: 100%; height: 44px; padding: 0 12px; border: 1px solid #d1d5db; border-radius: 8px; background: white; font-size: 13px; outline: none; cursor: pointer;">
+              <option value="etudiant">Étudiant (Collaborateur)</option>
+              <option value="entreprise">Représentant d'Entreprise</option>
+              <option value="enseignant">Enseignant / Chercheur</option>
+            </select>
+          </div>
+
+          @if (signupForm.get('role')?.value === 'entreprise') {
+            <div style="margin-bottom: 12px; background: #f9fafb; padding: 12px; border-radius: 8px; border: 1px solid #e5e7eb;">
+              <label style="display: block; font-size: 12px; font-weight: 600; color: #374151; margin-bottom: 4px;">
+                Nom de votre Entreprise
+              </label>
+              <input
+                type="text"
+                formControlName="nomEntreprise"
+                placeholder="Ex: Vermeg, Sofrecom, Telnet..."
+                style="width: 100%; height: 40px; padding: 0 12px; border: 1px solid #d1d5db; border-radius: 8px; background: white; color: #111827; font-size: 13px; outline: none; box-sizing: border-box;"
+              />
+            </div>
+          }
+
+          @if (signupForm.get('role')?.value === 'enseignant') {
+            <div style="margin-bottom: 12px; background: #f9fafb; padding: 12px; border-radius: 8px; border: 1px solid #e5e7eb;">
+              <label style="display: block; font-size: 12px; font-weight: 600; color: #374151; margin-bottom: 4px;">
+                Nom de votre Laboratoire
+              </label>
+              <input
+                type="text"
+                formControlName="nomLabo"
+                placeholder="Ex: CRISTAL, RIADI, HANA..."
+                style="width: 100%; height: 40px; padding: 0 12px; border: 1px solid #d1d5db; border-radius: 8px; background: white; color: #111827; font-size: 13px; outline: none; box-sizing: border-box;"
+              />
+            </div>
+          }
+
+          <button
+            type="submit"
+            [disabled]="signupForm.invalid || isSubmitting"
+            style="width: 100%; height: 46px; background: #4f46e5; color: white; border: none; border-radius: 8px; font-size: 14px; font-weight: bold; cursor: pointer; margin-top: 10px; transition: background 0.2s;"
+          >
+            {{ isSubmitting ? 'Création en cours...' : 'Créer mon compte' }}
+          </button>
+
+          <div style="text-align: center; margin-top: 16px; font-size: 13px; color: #6b7280;">
+            Déjà un compte ? 
+            <a routerLink="/auth/login" style="color: #4f46e5; font-weight: bold; text-decoration: none;">Se connecter</a>
+          </div>
+        </form>
+      }
+    </div>
+
+  </div>
 </div>

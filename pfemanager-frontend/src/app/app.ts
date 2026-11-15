@@ -1,6 +1,7 @@
+import { HttpClient } from '@angular/common/http';
 import { Component, OnInit, AfterViewInit, inject } from '@angular/core';
+import { Router, RouterOutlet } from '@angular/router';
 import { PreloaderService, SettingsService } from '@core';
-import { RouterOutlet } from '@angular/router';
 
 @Component({
   selector: 'app-root',
@@ -12,13 +13,68 @@ import { RouterOutlet } from '@angular/router';
 export class App implements OnInit, AfterViewInit {
   private readonly preloader = inject(PreloaderService);
   private readonly settings = inject(SettingsService);
+  private readonly router = inject(Router);
+  private readonly http = inject(HttpClient);
+  private currentBuildHash: string | null = null;
 
   ngOnInit() {
     this.settings.setDirection();
     this.settings.setTheme();
+
+    // Active la réinitialisation des composants lors d'une navigation sur la même route
+    this.router.onSameUrlNavigation = 'reload';
+
+    // 1. Rafraîchit automatiquement la vue active dès que tu reviens sur l'onglet
+    document.addEventListener('visibilitychange', () => {
+      if (!document.hidden) {
+        this.refreshCurrentView();
+      }
+    });
+
+    // 2. Rafraîchit automatiquement les données toutes les 6 secondes en arrière-plan
+    setInterval(() => {
+      if (!document.hidden) {
+        this.refreshCurrentView();
+      }
+    }, 6000);
+
+    // 3. Recharge automatiquement l'application après un git push / déploiement Vercel
+    this.checkAppVersion();
+    setInterval(() => this.checkAppVersion(), 15000);
   }
 
   ngAfterViewInit() {
     this.preloader.hide();
+  }
+
+  private refreshCurrentView(): void {
+    const url = this.router.url;
+    // Protège la page de login, les modales ouvertes et les formulaires en cours de saisie
+    if (!url || url === '/' || url.includes('/auth')) return;
+    if (document.querySelector('.cdk-overlay-pane')) return;
+    const activeTag = document.activeElement?.tagName;
+    if (activeTag === 'INPUT' || activeTag === 'TEXTAREA' || activeTag === 'SELECT') return;
+
+    // Réinitialise proprement le composant courant sans recharger toute la page
+    this.router.navigateByUrl('/', { skipLocationChange: true }).then(() => {
+      this.router.navigateByUrl(url);
+    });
+  }
+
+  private checkAppVersion(): void {
+    if (document.hidden) return;
+    this.http.get(`/index.html?v=${Date.now()}`, { responseType: 'text' }).subscribe({
+      next: (html) => {
+        const match = html.match(/main-[A-Z0-9]+\.js/i);
+        const latestHash = match ? match[0] : null;
+        if (!latestHash) return;
+
+        if (!this.currentBuildHash) {
+          this.currentBuildHash = latestHash;
+        } else if (this.currentBuildHash !== latestHash) {
+          window.location.reload();
+        }
+      },
+    });
   }
 }

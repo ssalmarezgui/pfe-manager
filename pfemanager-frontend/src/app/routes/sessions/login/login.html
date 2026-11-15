@@ -58,6 +58,15 @@
         </div>
 
       </form>
+      @if (statusBannerMessage) {
+        <div [style.background]="statusBannerType === 'pending' ? '#fef3c7' : '#fee2e2'"
+             [style.border]="statusBannerType === 'pending' ? '1px solid #fcd34d' : '1px solid #fca5a5'"
+             [style.color]="statusBannerType === 'pending' ? '#92400e' : '#991b1b'"
+             style="padding: 12px 14px; border-radius: 10px; font-size: 13px; line-height: 1.5; margin-bottom: 18px; display: flex; align-items: flex-start; gap: 10px;">
+          <span style="font-size: 16px;">{{ statusBannerType === 'pending' ? '⏳' : '⚠️' }}</span>
+          <span>{{ statusBannerMessage }}</span>
+        </div>
+      }
     </div>
 
   </div>

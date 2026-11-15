@@ -37,6 +37,8 @@ export class Login {
   private readonly permissionsService = inject(NgxPermissionsService);
 
   isSubmitting = false;
+  statusBannerMessage = '';
+  statusBannerType: 'pending' | 'error' = 'error';
 
   loginForm = this.fb.nonNullable.group({
     username: ['', [Validators.required]],
@@ -89,6 +91,7 @@ export class Login {
         } catch (e) {}
 
         this.isSubmitting = false;
+        this.statusBannerMessage = '';
         localStorage.removeItem('auth-token');
         localStorage.removeItem('auth-user');
         sessionStorage.setItem('auth-token', res.token);
@@ -96,13 +99,18 @@ export class Login {
 
         window.location.href = '/dashboard';
       },
+
       error: (err: HttpErrorResponse) => {
-        if (err.status === 403 && err.error?.message) {
-          alert('⏳ ' + err.error.message);
-        } else {
-          alert('Erreur : Email ou mot de passe incorrect !');
-        }
         this.isSubmitting = false;
+        if (err.status === 403) {
+          this.statusBannerType = 'pending';
+          this.statusBannerMessage =
+            err.error?.message ||
+            "Votre compte est en attente de validation par l'administrateur. Vous recevrez un email dès son activation.";
+        } else {
+          this.statusBannerType = 'error';
+          this.statusBannerMessage = 'Email ou mot de passe incorrect.';
+        }
       },
     });
   }

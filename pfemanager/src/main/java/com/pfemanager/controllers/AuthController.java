@@ -8,6 +8,7 @@ import com.pfemanager.security.UserDetailsImpl;
 import com.pfemanager.services.EmailService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.DisabledException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -69,7 +70,7 @@ public class AuthController {
                     roles,
                     userDetails.getIdEntreprise(),
                     userDetails.getIdLabo()));
-        } catch (org.springframework.security.authentication.DisabledException e) {
+        } catch (DisabledException e) {
             return ResponseEntity.status(403).body(new MessageResponse("Votre compte est en attente de validation par l'administrateur."));
         }
     }
@@ -100,17 +101,17 @@ public class AuthController {
                 if (signUpRequest.getNomEntreprise() != null && !signUpRequest.getNomEntreprise().trim().isEmpty()) {
                     String nomEnt = signUpRequest.getNomEntreprise().trim();
                     Entreprise entreprise = entrepriseRepository.findAll().stream()
-                        .filter(e -> e.getNom() != null && e.getNom().equalsIgnoreCase(nomEnt))
-                        .findFirst()
-                        .orElseGet(() -> {
-                            Entreprise nouvelle = new Entreprise();
-                            nouvelle.setNom(nomEnt);
-                            nouvelle.setSecteur("IT & Développement");
-                            nouvelle.setEmail(signUpRequest.getEmail());
-                            nouvelle.setTel(signUpRequest.getTel());
-                            nouvelle.setAdresse("Tunisie");
-                            return entrepriseRepository.save(nouvelle);
-                        });
+                            .filter(e -> e.getNom() != null && e.getNom().equalsIgnoreCase(nomEnt))
+                            .findFirst()
+                            .orElseGet(() -> {
+                                Entreprise nouvelle = new Entreprise();
+                                nouvelle.setNom(nomEnt);
+                                nouvelle.setSecteur("IT & Développement");
+                                nouvelle.setEmail(signUpRequest.getEmail());
+                                nouvelle.setTel(signUpRequest.getTel());
+                                nouvelle.setAdresse("Tunisie");
+                                return entrepriseRepository.save(nouvelle);
+                            });
                     user.setEntreprise(entreprise);
                 } else if (signUpRequest.getIdEntreprise() != null) {
                     entrepriseRepository.findById(signUpRequest.getIdEntreprise()).ifPresent(user::setEntreprise);
@@ -118,30 +119,30 @@ public class AuthController {
                 break;
 
             case "enseignant":
-    Role enseignantRole = roleRepository.findByLibelle(ERole.ROLE_ENSEIGNANT)
-            .orElseThrow(() -> new RuntimeException("Erreur: Rôle Enseignant introuvable."));
-    roles.add(enseignantRole);
+                Role enseignantRole = roleRepository.findByLibelle(ERole.ROLE_ENSEIGNANT)
+                        .orElseThrow(() -> new RuntimeException("Erreur: Rôle Enseignant introuvable."));
+                roles.add(enseignantRole);
 
-    if (signUpRequest.getNomLabo() != null && !signUpRequest.getNomLabo().trim().isEmpty()) {
-        String nomLab = signUpRequest.getNomLabo().trim();
-        LaboRecherche labo = laboRepository.findAll().stream()
-                .filter(l -> l.getNom() != null && l.getNom().equalsIgnoreCase(nomLab))
-                .findFirst()
-                .orElseGet(() -> {
-                    LaboRecherche nouveau = new LaboRecherche();
-                    nouveau.setNom(nomLab);
-                    nouveau.setDomaine("Informatique & Recherche");
-                    nouveau.setEtablissement("ENSI Manouba");
-                    nouveau.setEmail(signUpRequest.getEmail());
-                    nouveau.setTel(signUpRequest.getTel());
-                    nouveau.setAdresse("Campus Universitaire de la Manouba");
-                    return laboRepository.save(nouveau);
-                });
-        user.setLabo(labo);
-    } else if (signUpRequest.getIdLabo() != null) {
-        laboRepository.findById(signUpRequest.getIdLabo()).ifPresent(user::setLabo);
-    }
-    break;
+                if (signUpRequest.getNomLabo() != null && !signUpRequest.getNomLabo().trim().isEmpty()) {
+                    String nomLab = signUpRequest.getNomLabo().trim();
+                    LaboRecherche labo = laboRepository.findAll().stream()
+                            .filter(l -> l.getNom() != null && l.getNom().equalsIgnoreCase(nomLab))
+                            .findFirst()
+                            .orElseGet(() -> {
+                                LaboRecherche nouveau = new LaboRecherche();
+                                nouveau.setNom(nomLab);
+                                nouveau.setDomaine("Informatique & Recherche");
+                                nouveau.setEtablissement("ENSI Manouba");
+                                nouveau.setEmail(signUpRequest.getEmail());
+                                nouveau.setTel(signUpRequest.getTel());
+                                nouveau.setAdresse("Campus Universitaire de la Manouba");
+                                return laboRepository.save(nouveau);
+                            });
+                    user.setLabo(labo);
+                } else if (signUpRequest.getIdLabo() != null) {
+                    laboRepository.findById(signUpRequest.getIdLabo()).ifPresent(user::setLabo);
+                }
+                break;
 
             default:
                 Role etudiantRole = roleRepository.findByLibelle(ERole.ROLE_ETUDIANT)
@@ -149,14 +150,17 @@ public class AuthController {
                 roles.add(etudiantRole);
                 break;
         }
-        
+
         user.setRoles(roles);
-        user.setEnabled(false);
+        user.setEnabled(false); // Compte bloqué jusqu'à validation par l'Admin
         userRepository.save(user);
 
-        // Notification par Email à l'administrateur
+        // 1. Notification par Email à l'administrateur (ssalmarezgui@gmail.com)
         emailService.notifierAdminNouvelleInscription(user.getNom(), user.getPrenom(), user.getEmail(), strRole);
 
-        return ResponseEntity.ok(new MessageResponse("Utilisateur enregistré avec succès !"));
+        // 2. Email envoyé au créateur du compte pour lui demander d'attendre la validation
+        emailService.notifierUtilisateurInscriptionEnAttente(user.getEmail(), user.getPrenom(), user.getNom());
+
+        return ResponseEntity.ok(new MessageResponse("Votre compte a bien été créé et est en attente de validation par l'administrateur."));
     }
 }

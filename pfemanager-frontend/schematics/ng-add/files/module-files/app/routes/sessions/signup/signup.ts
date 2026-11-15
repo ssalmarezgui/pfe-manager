@@ -1,41 +1,92 @@
-/* eslint-disable @angular-eslint/prefer-standalone */
-import { Component, inject } from '@angular/core';
-import { AbstractControl, FormBuilder, Validators } from '@angular/forms';
+import { HttpClient } from '@angular/common/http';
+import { Component, OnInit, inject } from '@angular/core';
+import { FormBuilder, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
+import { MatButtonModule } from '@angular/material/button';
+import { MatCardModule } from '@angular/material/card';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatInputModule } from '@angular/material/input';
+import { MatSelectModule } from '@angular/material/select';
+import { RouterLink } from '@angular/router';
+import { CommonModule } from '@angular/common';
 
 @Component({
   selector: 'app-signup',
+  standalone: true,
+  imports: [
+    CommonModule,
+    FormsModule,
+    ReactiveFormsModule,
+    RouterLink,
+    MatButtonModule,
+    MatCardModule,
+    MatFormFieldModule,
+    MatInputModule,
+    MatSelectModule,
+  ],
   templateUrl: './signup.html',
-  styleUrl: './signup.scss',
-  standalone: false,
 })
-export class Signup {
+export class Signup implements OnInit {
   private readonly fb = inject(FormBuilder);
+  private readonly http = inject(HttpClient);
 
-  registerForm = this.fb.nonNullable.group(
-    {
-      username: ['', [Validators.required]],
-      password: ['', [Validators.required]],
-      confirmPassword: ['', [Validators.required]],
-    },
-    {
-      validators: [this.matchValidator('password', 'confirmPassword')],
-    },
-  );
+  isSubmitting = false;
+  errorMessage = '';
+  registrationSuccess = false;
+  createdEmail = '';
 
-  matchValidator(source: string, target: string) {
-    return (control: AbstractControl) => {
-      const sourceControl = control.get(source)!;
-      const targetControl = control.get(target)!;
-      if (targetControl.errors && !targetControl.errors['mismatch']) {
-        return null;
-      }
-      if (sourceControl.value !== targetControl.value) {
-        targetControl.setErrors({ mismatch: true });
-        return { mismatch: true };
+  signupForm = this.fb.nonNullable.group({
+    nom: ['', [Validators.required]],
+    prenom: ['', [Validators.required]],
+    email: ['', [Validators.required, Validators.email]],
+    password: ['', [Validators.required]],
+    tel: ['', [Validators.required]],
+    role: ['etudiant', [Validators.required]],
+    idEntreprise: [null as number | null],
+    nomEntreprise: [''],
+    idLabo: [null as number | null],
+    nomLabo: [''],
+  });
+
+  ngOnInit(): void {
+    this.signupForm.get('role')?.valueChanges.subscribe((role) => {
+      const nomEntCtrl = this.signupForm.get('nomEntreprise');
+      const nomLabCtrl = this.signupForm.get('nomLabo');
+
+      if (role === 'entreprise') {
+        nomEntCtrl?.setValidators([Validators.required]);
       } else {
-        targetControl.setErrors(null);
-        return null;
+        nomEntCtrl?.clearValidators();
+        nomEntCtrl?.setValue('');
       }
-    };
+
+      if (role === 'enseignant') {
+        nomLabCtrl?.setValidators([Validators.required]);
+      } else {
+        nomLabCtrl?.clearValidators();
+        nomLabCtrl?.setValue('');
+      }
+
+      nomEntCtrl?.updateValueAndValidity();
+      nomLabCtrl?.updateValueAndValidity();
+    });
+  }
+
+  register(): void {
+    if (this.signupForm.invalid) return;
+
+    this.isSubmitting = true;
+    this.errorMessage = '';
+    this.createdEmail = this.signupForm.value.email || '';
+
+    this.http.post('/api/auth/signup', this.signupForm.value).subscribe({
+      next: () => {
+        this.isSubmitting = false;
+        this.registrationSuccess = true;
+      },
+      error: (err) => {
+        this.errorMessage = err.error?.message || "Erreur lors de l'inscription.";
+        this.isSubmitting = false;
+      },
+    });
   }
 }
