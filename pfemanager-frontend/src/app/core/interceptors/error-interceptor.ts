@@ -30,7 +30,7 @@ export function errorInterceptor(req: HttpRequest<unknown>, next: HttpHandlerFn)
 
   return next(req).pipe(
     catchError((error: HttpErrorResponse) => {
-      if (errorPages.includes(error.status)) {
+      if (errorPages.includes(error.status) && !req.url.includes('/auth/signin')) {
         router.navigateByUrl(`/${error.status}`, {
           skipLocationChange: true,
         });

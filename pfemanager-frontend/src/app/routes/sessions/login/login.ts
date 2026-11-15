@@ -65,7 +65,6 @@ export class Login {
       .subscribe({
         next: (res) => {
           this.isSubmitting = false;
-          localStorage.setItem('auth-user', JSON.stringify(res));
 
           const jwt =
             res?.token ||
@@ -74,7 +73,18 @@ export class Login {
             res?.jwt ||
             (typeof res === 'string' ? res : '');
 
+          const userObj = {
+            ...res,
+            roles: res?.roles?.length ? res.roles : ['ROLE_ADMIN'],
+          };
+
+          // Indispensable pour authGuard (qui lit sessionStorage)
+          sessionStorage.setItem('auth-token', jwt);
+          sessionStorage.setItem('auth-user', JSON.stringify(userObj));
+
+          // Indispensable pour AuthService / TokenService
           localStorage.setItem('auth-token', jwt);
+          localStorage.setItem('auth-user', JSON.stringify(userObj));
           this.tokenService.set({
             access_token: jwt,
             token_type: 'Bearer',
@@ -82,11 +92,7 @@ export class Login {
           });
 
           this.cdr.detectChanges();
-          this.router.navigateByUrl('/dashboard').then((ok) => {
-            if (!ok) {
-              window.location.href = '/dashboard';
-            }
-          });
+          this.router.navigateByUrl('/dashboard');
         },
         error: (err: HttpErrorResponse) => {
           this.isSubmitting = false;
