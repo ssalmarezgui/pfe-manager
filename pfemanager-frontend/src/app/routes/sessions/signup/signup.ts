@@ -1,5 +1,5 @@
 import { HttpClient } from '@angular/common/http';
-import { Component, OnInit, inject } from '@angular/core';
+import { ChangeDetectorRef, Component, OnInit, inject } from '@angular/core';
 import { FormBuilder, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
@@ -29,6 +29,7 @@ export class Signup implements OnInit {
   private readonly fb = inject(FormBuilder);
   private readonly router = inject(Router);
   private readonly http = inject(HttpClient);
+  private readonly cdr = inject(ChangeDetectorRef);
 
   entreprises: any[] = [];
   labos: any[] = [];
@@ -73,10 +74,12 @@ export class Signup implements OnInit {
   }
 
   register(): void {
+    
     if (this.signupForm.invalid) return;
 
     this.isSubmitting = true;
     this.errorMessage = '';
+    this.cdr.detectChanges();
 
     this.http.post('/api/auth/signup', this.signupForm.value).subscribe({
       next: () => {
@@ -87,6 +90,7 @@ export class Signup implements OnInit {
       error: (err) => {
         this.errorMessage = err.error?.message || "Erreur lors de l'inscription.";
         this.isSubmitting = false;
+        this.cdr.detectChanges();
       },
     });
   }

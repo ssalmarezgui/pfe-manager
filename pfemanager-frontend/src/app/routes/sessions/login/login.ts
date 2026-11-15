@@ -6,7 +6,6 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatCheckboxModule } from '@angular/material/checkbox';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
-import { MtxButtonModule } from '@ng-matero/extensions/button';
 import { TokenService } from '@core/authentication';
 
 @Component({
@@ -20,7 +19,6 @@ import { TokenService } from '@core/authentication';
     MatCheckboxModule,
     MatFormFieldModule,
     MatInputModule,
-    MtxButtonModule,
   ],
 })
 export class Login {
@@ -60,7 +58,7 @@ export class Login {
     this.cdr.detectChanges();
 
     this.http
-      .post<any>('/api/auth/signin', {
+      .post<any>('https://pfe-manager-3d06.onrender.com/api/auth/signin', {
         email: this.username.value,
         password: this.password.value,
       })
@@ -69,7 +67,6 @@ export class Login {
           this.isSubmitting = false;
           localStorage.setItem('auth-user', JSON.stringify(res));
 
-          // Récupère le JWT quelle que soit la clé renvoyée par Spring Boot
           const jwt =
             res?.token ||
             res?.accessToken ||
@@ -77,13 +74,19 @@ export class Login {
             res?.jwt ||
             (typeof res === 'string' ? res : '');
 
+          localStorage.setItem('auth-token', jwt);
           this.tokenService.set({
             access_token: jwt,
             token_type: 'Bearer',
+            expires_in: 86400,
           });
 
           this.cdr.detectChanges();
-          this.router.navigateByUrl('/dashboard');
+          this.router.navigateByUrl('/dashboard').then((ok) => {
+            if (!ok) {
+              window.location.href = '/dashboard';
+            }
+          });
         },
         error: (err: HttpErrorResponse) => {
           this.isSubmitting = false;
