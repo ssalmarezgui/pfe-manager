@@ -114,12 +114,11 @@
 
         <!-- Bouton Soumission -->
         <button
-          type="submit"
-          [disabled]="signupForm.invalid || isSubmitting"
-          style="width: 100%; height: 46px; background: #4f46e5; color: white; border: none; border-radius: 8px; font-size: 14px; font-weight: bold; cursor: pointer; margin-top: 10px; transition: background 0.2s;"
-          [style.opacity]="isSubmitting ? '0.7' : '1'"
-        >
-          {{ isSubmitting ? 'Création en cours...' : 'Créer mon compte' }}
+          type="button"
+          style="width: 100%; height: 46px; border: none; border-radius: 10px; background: #4f46e5; color: #ffffff; font-weight: 600; font-size: 0.98rem; cursor: pointer;"
+          [disabled]="loginForm.invalid || isSubmitting"
+          (click)="login()">
+          {{ isSubmitting ? 'Connexion en cours...' : 'Se connecter' }}
         </button>
 
         <!-- Lien Connexion -->
