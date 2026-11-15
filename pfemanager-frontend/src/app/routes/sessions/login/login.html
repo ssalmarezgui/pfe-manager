@@ -1,87 +1,68 @@
-import { Component, inject } from '@angular/core';
-import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
-import { Router, RouterLink } from '@angular/router';
-import { HttpErrorResponse } from '@angular/common/http';
-import { MatButtonModule } from '@angular/material/button';
-import { MatCardModule } from '@angular/material/card';
-import { MatCheckboxModule } from '@angular/material/checkbox';
-import { MatFormFieldModule } from '@angular/material/form-field';
-import { MatInputModule } from '@angular/material/input';
-import { MtxButtonModule } from '@ng-matero/extensions/button';
-import { TranslatePipe } from '@ngx-translate/core';
-import { AuthService } from '@core/authentication';
+<div class="d-flex w-full h-full">
+  <mat-card class="m-auto" style="max-width: 380px">
+    <mat-card-header class="m-b-24">
+      <mat-card-title>👋 {{ 'login_title' | translate }}!</mat-card-title>
+    </mat-card-header>
 
-@Component({
-  selector: 'app-login',
-  templateUrl: './login.html',
-  styleUrl: './login.scss',
-  imports: [
-    ReactiveFormsModule,
-    RouterLink,
-    MatButtonModule,
-    MatCardModule,
-    MatCheckboxModule,
-    MatFormFieldModule,
-    MatInputModule,
-    MtxButtonModule,
-    TranslatePipe,
-  ],
-})
-export class Login {
-  private readonly fb = inject(FormBuilder);
-  private readonly router = inject(Router);
-  private readonly auth = inject(AuthService);
+    <mat-card-content>
+      @if (statusMessage) {
+        <div
+          style="padding: 12px 16px; border-radius: 10px; margin-bottom: 18px; font-size: 0.9rem; font-weight: 500; line-height: 1.45;"
+          [style.background]="statusType === 'pending' ? '#fef3c7' : '#fee2e2'"
+          [style.color]="statusType === 'pending' ? '#92400e' : '#991b1b'"
+          [style.border]="statusType === 'pending' ? '1px solid #fcd34d' : '1px solid #fca5a5'">
+          {{ statusType === 'pending' ? '⏳ ' : '⚠️ ' }}{{ statusMessage }}
+        </div>
+      }
 
-  isSubmitting = false;
-  statusMessage = '';
-  statusType: 'pending' | 'error' = 'error';
+      <form class="form-field-full" [formGroup]="loginForm">
+        <mat-form-field appearance="outline">
+          <mat-label>{{ 'username' | translate }}</mat-label>
+          <input matInput placeholder="Email" formControlName="username" required />
+          @if (username.invalid) {
+            <mat-error>
+              @if (username.errors?.['required']) {
+                <span>{{ 'please_enter' | translate }}</span>
+              }
+            </mat-error>
+          }
+        </mat-form-field>
 
-  loginForm = this.fb.nonNullable.group({
-    username: ['', [Validators.required]],
-    password: ['', [Validators.required]],
-    rememberMe: [false],
-  });
+        <mat-form-field appearance="outline">
+          <mat-label>{{ 'password' | translate }}</mat-label>
+          <input
+            matInput
+            placeholder="Mot de passe"
+            type="password"
+            formControlName="password"
+            required
+          />
+          @if (password.invalid) {
+            <mat-error>
+              @if (password.errors?.['required']) {
+                <span>{{ 'please_enter' | translate }}</span>
+              }
+            </mat-error>
+          }
+        </mat-form-field>
 
-  get username() {
-    return this.loginForm.get('username')!;
-  }
+        <mat-checkbox formControlName="rememberMe">{{ 'remember_me' | translate }}</mat-checkbox>
 
-  get password() {
-    return this.loginForm.get('password')!;
-  }
+        <button
+          class="w-full m-y-16"
+          mat-flat-button
+          [disabled]="!!loginForm.invalid"
+          [loading]="isSubmitting"
+          (click)="login()"
+        >
+          {{ 'login' | translate }}
+        </button>
 
-  get rememberMe() {
-    return this.loginForm.get('rememberMe')!;
-  }
-
-  login() {
-    if (this.loginForm.invalid) return;
-
-    this.isSubmitting = true;
-    this.statusMessage = '';
-
-    this.auth.login(this.username.value, this.password.value, this.rememberMe.value).subscribe({
-      next: (authenticated) => {
-        this.isSubmitting = false;
-        if (authenticated) {
-          this.router.navigateByUrl('/');
-        }
-      },
-      error: (err: HttpErrorResponse) => {
-        this.isSubmitting = false;
-        if (err.status === 403) {
-          this.statusType = 'pending';
-          this.statusMessage =
-            err.error?.message ||
-            "Votre compte est suspendu ou en attente de validation par l'administrateur.";
-        } else if (err.status === 401) {
-          this.statusType = 'error';
-          this.statusMessage = 'Email ou mot de passe incorrect.';
-        } else {
-          this.statusType = 'error';
-          this.statusMessage = err.error?.message || 'Erreur lors de la connexion.';
-        }
-      },
-    });
-  }
-}
+        <div>
+          <span>{{ 'have_no_account' | translate }} </span>
+          <a routerLink="/auth/register">{{ 'signup' | translate }}</a>
+        </div>
+      </form>
+    </mat-card-content>
+  </mat-card>
+</div>
