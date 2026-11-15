@@ -80,11 +80,12 @@ export class Signup implements OnInit {
 
     this.http.post('/api/auth/signup', this.signupForm.value).subscribe({
       next: () => {
-        alert('Compte cree avec succes ! Vous pouvez maintenant vous connecter.');
+        this.isSubmitting = false;
+        alert("Inscription enregistrée ! Votre compte est en attente de validation par l'administrateur.");
         this.router.navigateByUrl('/auth/login');
       },
       error: (err) => {
-        this.errorMessage = err.error?.message || 'Erreur lors de l\'inscription.';
+        this.errorMessage = err.error?.message || "Erreur lors de l'inscription.";
         this.isSubmitting = false;
       },
     });
