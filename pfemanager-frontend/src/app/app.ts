@@ -1,5 +1,5 @@
 import { Component, OnInit, AfterViewInit, inject } from '@angular/core';
-import { Router, RouterOutlet } from '@angular/router';
+import { RouterOutlet } from '@angular/router';
 import { PreloaderService, SettingsService } from '@core';
 
 @Component({
@@ -12,51 +12,19 @@ import { PreloaderService, SettingsService } from '@core';
 export class App implements OnInit, AfterViewInit {
   private readonly preloader = inject(PreloaderService);
   private readonly settings = inject(SettingsService);
-  private readonly router = inject(Router);
   private currentBuildHash: string | null = null;
 
   ngOnInit() {
     this.settings.setDirection();
     this.settings.setTheme();
 
-    // Active la réinitialisation des composants lors d'une navigation sur la même route
-    this.router.onSameUrlNavigation = 'reload';
-
-    // 1. Rafraîchit automatiquement la vue active dès que tu reviens sur l'onglet
-    document.addEventListener('visibilitychange', () => {
-      if (!document.hidden) {
-        this.refreshCurrentView();
-      }
-    });
-
-    // 2. Rafraîchit automatiquement les données toutes les 6 secondes en arrière-plan
-    setInterval(() => {
-      if (!document.hidden) {
-        this.refreshCurrentView();
-      }
-    }, 6000);
-
-    // 3. Recharge automatiquement l'application après un git push / déploiement Vercel
+    // Recharge uniquement lorsqu'une nouvelle version est déployée sur Vercel
     this.checkAppVersion();
-    setInterval(() => this.checkAppVersion(), 15000);
+    setInterval(() => this.checkAppVersion(), 30000);
   }
 
   ngAfterViewInit() {
     this.preloader.hide();
-  }
-
-  private refreshCurrentView(): void {
-    const url = this.router.url;
-    // Protège la page de login/signup, les modales ouvertes et les formulaires en cours de saisie
-    if (!url || url === '/' || url.includes('/auth')) return;
-    if (document.querySelector('.cdk-overlay-pane')) return;
-    const activeTag = document.activeElement?.tagName;
-    if (activeTag === 'INPUT' || activeTag === 'TEXTAREA' || activeTag === 'SELECT') return;
-
-    // Réinitialise proprement le composant courant sans recharger toute la page
-    this.router.navigateByUrl('/', { skipLocationChange: true }).then(() => {
-      this.router.navigateByUrl(url);
-    });
   }
 
   private async checkAppVersion(): Promise<void> {

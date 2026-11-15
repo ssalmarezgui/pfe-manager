@@ -1,68 +1,36 @@
-import { HttpClient, HttpErrorResponse } from '@angular/common/http';
+import { HttpErrorResponse } from '@angular/common/http';
 import { Component, inject } from '@angular/core';
-import { FormBuilder, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
-import { MatButtonModule } from '@angular/material/button';
-import { MatCardModule } from '@angular/material/card';
-import { MatCheckboxModule } from '@angular/material/checkbox';
-import { MatFormFieldModule } from '@angular/material/form-field';
-import { MatInputModule } from '@angular/material/input';
-import { Router, RouterLink } from '@angular/router';
-import { MtxButtonModule } from '@ng-matero/extensions/button';
-import { TranslatePipe } from '@ngx-translate/core';
-import { TokenService } from '@core/authentication';
-import { NgxPermissionsService } from 'ngx-permissions';
+import { FormBuilder, Validators } from '@angular/forms';
+import { Router } from '@angular/router';
+import { filter } from 'rxjs';
+import { AuthService } from '@core/authentication';
+
 
 @Component({
   selector: 'app-login',
   templateUrl: './login.html',
   styleUrl: './login.scss',
-  imports: [
-    FormsModule,
-    ReactiveFormsModule,
-    RouterLink,
-    MatButtonModule,
-    MatCardModule,
-    MatCheckboxModule,
-    MatFormFieldModule,
-    MatInputModule,
-    MtxButtonModule,
-    TranslatePipe,
-  ],
+  standalone: false,
 })
 export class Login {
   private readonly fb = inject(FormBuilder);
   private readonly router = inject(Router);
-  private readonly http = inject(HttpClient);
-  private readonly tokenService = inject(TokenService);
-  private readonly permissionsService = inject(NgxPermissionsService);
+  private readonly auth = inject(AuthService);
 
   isSubmitting = false;
-  statusBannerMessage = '';
-  statusBannerType: 'pending' | 'error' = 'error';
+  statusMessage = '';
+  statusType: 'pending' | 'error' = 'error';
 
   loginForm = this.fb.nonNullable.group({
-    username: ['', [Validators.required]],
-    password: ['', [Validators.required]],
+    username: ['ng-matero', [Validators.required]],
+    password: ['ng-matero', [Validators.required]],
     rememberMe: [false],
   });
-
-  remplirAdmin() {
-    this.loginForm.patchValue({ username: 'admin@pfemanager.com', password: 'admin123' });
-  }
-
-  remplirEtudiant() {
-    this.loginForm.patchValue({ username: 'yassine.etudiant@ensi-uma.tn', password: 'password123' });
-  }
-
-  remplirEntreprise() {
-    this.loginForm.patchValue({ username: 'sami.rh@smartsoft.tn', password: 'password123' });
-  }
 
   get username() {
     return this.loginForm.get('username')!;
   }
 
-  // AJOUTÉ ICI :
   get password() {
     return this.loginForm.get('password')!;
   }
@@ -74,44 +42,28 @@ export class Login {
   login() {
     this.isSubmitting = true;
 
-    this.http.post<any>('/api/auth/signin', {
-      email: this.loginForm.value.username,
-      password: this.loginForm.value.password,
-    }).subscribe({
-      next: (res) => {
-        sessionStorage.setItem('auth-token', res.token);
-        sessionStorage.setItem('auth-user', JSON.stringify(res));
-
-        localStorage.clear();
-
-        this.permissionsService.loadPermissions(res.roles);
-
-        try {
-          this.tokenService.set({ access_token: res.token, token_type: 'Bearer' });
-        } catch (e) {}
-
-        this.isSubmitting = false;
-        this.statusBannerMessage = '';
-        localStorage.removeItem('auth-token');
-        localStorage.removeItem('auth-user');
-        sessionStorage.setItem('auth-token', res.token);
-        sessionStorage.setItem('auth-user', JSON.stringify(res));
-
-        window.location.href = '/dashboard';
-      },
-
-      error: (err: HttpErrorResponse) => {
-        this.isSubmitting = false;
-        if (err.status === 403) {
-          this.statusBannerType = 'pending';
-          this.statusBannerMessage =
-            err.error?.message ||
-            "Votre compte est en attente de validation par l'administrateur. Vous recevrez un email dès son activation.";
-        } else {
-          this.statusBannerType = 'error';
-          this.statusBannerMessage = 'Email ou mot de passe incorrect.';
+    this.auth
+      .login(this.username.value, this.password.value, this.rememberMe.value)
+      .pipe(filter(authenticated => authenticated))
+      .subscribe({
+        next: () => {
+          this.router.navigateByUrl('/');
+        },
+        error: (err: HttpErrorResponse) => {
+          this.isSubmitting = false;
+          if (err.status === 403) {
+            this.statusType = 'pending';
+            this.statusMessage =
+              err.error?.message ||
+              "Votre compte est suspendu ou en attente de validation par l'administrateur.";
+          } else if (err.status === 401) {
+            this.statusType = 'error';
+            this.statusMessage = 'Email ou mot de passe incorrect.';
+          } else {
+            this.statusType = 'error';
+            this.statusMessage = err.error?.message || 'Erreur lors de la connexion.';
+          }
         }
-      },
-    });
+      });
   }
 }

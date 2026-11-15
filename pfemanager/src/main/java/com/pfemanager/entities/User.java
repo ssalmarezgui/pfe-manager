@@ -86,4 +86,9 @@ public class User {
 
     public List<SujetPFE> getSujetsDeposes() { return sujetsDeposes; }
     public void setSujetsDeposes(List<SujetPFE> sujetsDeposes) { this.sujetsDeposes = sujetsDeposes; }
+
+    public User orElseThrow(Object object) {
+        // TODO Auto-generated method stub
+        throw new UnsupportedOperationException("Unimplemented method 'orElseThrow'");
+    }
 }

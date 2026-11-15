@@ -4,8 +4,8 @@ import { Component, inject } from '@angular/core';
 import { FormBuilder, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
 import { filter } from 'rxjs';
-
 import { AuthService } from '@core/authentication';
+
 
 @Component({
   selector: 'app-login',
@@ -19,6 +19,8 @@ export class Login {
   private readonly auth = inject(AuthService);
 
   isSubmitting = false;
+  statusMessage = '';
+  statusType: 'pending' | 'error' = 'error';
 
   loginForm = this.fb.nonNullable.group({
     username: ['ng-matero', [Validators.required]],
@@ -48,18 +50,21 @@ export class Login {
         next: () => {
           this.router.navigateByUrl('/');
         },
-        error: (errorRes: HttpErrorResponse) => {
-          if (errorRes.status === 422) {
-            const form = this.loginForm;
-            const errors = errorRes.error.errors;
-            Object.keys(errors).forEach(key => {
-              form.get(key === 'email' ? 'username' : key)?.setErrors({
-                remote: errors[key][0],
-              });
-            });
-          }
+        error: (err: HttpErrorResponse) => {
           this.isSubmitting = false;
-        },
+          if (err.status === 403) {
+            this.statusType = 'pending';
+            this.statusMessage =
+              err.error?.message ||
+              "Votre compte est suspendu ou en attente de validation par l'administrateur.";
+          } else if (err.status === 401) {
+            this.statusType = 'error';
+            this.statusMessage = 'Email ou mot de passe incorrect.';
+          } else {
+            this.statusType = 'error';
+            this.statusMessage = err.error?.message || 'Erreur lors de la connexion.';
+          }
+        }
       });
   }
 }
