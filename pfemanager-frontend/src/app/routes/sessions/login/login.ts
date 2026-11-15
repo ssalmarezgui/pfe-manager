@@ -1,16 +1,25 @@
-import { HttpErrorResponse } from '@angular/common/http';
 import { Component, inject } from '@angular/core';
-import { FormBuilder, Validators } from '@angular/forms';
-import { Router } from '@angular/router';
-import { filter } from 'rxjs';
+import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
+import { Router, RouterLink } from '@angular/router';
+import { HttpErrorResponse } from '@angular/common/http';
+import { MatButtonModule } from '@angular/material/button';
+import { MatCheckboxModule } from '@angular/material/checkbox';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatInputModule } from '@angular/material/input';
 import { AuthService } from '@core/authentication';
-
 
 @Component({
   selector: 'app-login',
   templateUrl: './login.html',
   styleUrl: './login.scss',
-  standalone: false,
+  imports: [
+    ReactiveFormsModule,
+    RouterLink,
+    MatButtonModule,
+    MatCheckboxModule,
+    MatFormFieldModule,
+    MatInputModule,
+  ],
 })
 export class Login {
   private readonly fb = inject(FormBuilder);
@@ -18,12 +27,12 @@ export class Login {
   private readonly auth = inject(AuthService);
 
   isSubmitting = false;
-  statusMessage = '';
-  statusType: 'pending' | 'error' = 'error';
+  statusBannerMessage = '';
+  statusBannerType: 'pending' | 'error' = 'error';
 
   loginForm = this.fb.nonNullable.group({
-    username: ['ng-matero', [Validators.required]],
-    password: ['ng-matero', [Validators.required]],
+    username: ['', [Validators.required]],
+    password: ['', [Validators.required]],
     rememberMe: [false],
   });
 
@@ -40,30 +49,33 @@ export class Login {
   }
 
   login() {
-    this.isSubmitting = true;
+    if (this.loginForm.invalid) return;
 
-    this.auth
-      .login(this.username.value, this.password.value, this.rememberMe.value)
-      .pipe(filter(authenticated => authenticated))
-      .subscribe({
-        next: () => {
+    this.isSubmitting = true;
+    this.statusBannerMessage = '';
+
+    this.auth.login(this.username.value, this.password.value, this.rememberMe.value).subscribe({
+      next: (authenticated) => {
+        this.isSubmitting = false;
+        if (authenticated) {
           this.router.navigateByUrl('/');
-        },
-        error: (err: HttpErrorResponse) => {
-          this.isSubmitting = false;
-          if (err.status === 403) {
-            this.statusType = 'pending';
-            this.statusMessage =
-              err.error?.message ||
-              "Votre compte est suspendu ou en attente de validation par l'administrateur.";
-          } else if (err.status === 401) {
-            this.statusType = 'error';
-            this.statusMessage = 'Email ou mot de passe incorrect.';
-          } else {
-            this.statusType = 'error';
-            this.statusMessage = err.error?.message || 'Erreur lors de la connexion.';
-          }
         }
-      });
+      },
+      error: (err: HttpErrorResponse) => {
+        this.isSubmitting = false;
+        if (err.status === 403) {
+          this.statusBannerType = 'pending';
+          this.statusBannerMessage =
+            err.error?.message ||
+            "Votre compte est suspendu ou en attente de validation par l'administrateur.";
+        } else if (err.status === 401) {
+          this.statusBannerType = 'error';
+          this.statusBannerMessage = 'Email ou mot de passe incorrect.';
+        } else {
+          this.statusBannerType = 'error';
+          this.statusBannerMessage = err.error?.message || 'Erreur lors de la connexion.';
+        }
+      },
+    });
   }
 }
